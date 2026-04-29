@@ -1,0 +1,187 @@
+[
+  {
+    "offer_id": "EARLY_CHECKIN",
+    "category": "room",
+    "title": {
+      "en": "Early Check-in",
+      "ja": "アーリーチェックイン",
+      "ko": "얼리 체크인",
+      "zh": "提前入住"
+    },
+    "description": {
+      "en": "Check in from 11:00 AM instead of 3:00 PM",
+      "ja": "通常15時のチェックインを11時からに変更",
+      "ko": "오후 3시 대신 오전 11시부터 체크인",
+      "zh": "从上午11点开始入住，而非下午3点"
+    },
+    "price": 3500,
+    "original_price": 5000,
+    "unit": "per_stay",
+    "availability": 3,
+    "popularity": 82,
+    "tags": ["time", "convenience"],
+    "applicable_to": ["all"]
+  },
+  {
+    "offer_id": "LATE_CHECKOUT",
+    "category": "room",
+    "title": {
+      "en": "Late Check-out",
+      "ja": "レイトチェックアウト",
+      "ko": "레이트 체크아웃",
+      "zh": "延迟退房"
+    },
+    "description": {
+      "en": "Extend your stay until 3:00 PM instead of 11:00 AM",
+      "ja": "通常11時のチェックアウトを15時まで延長",
+      "ko": "오전 11시 대신 오후 3시까지 체류",
+      "zh": "退房时间延长至下午3点"
+    },
+    "price": 2000,
+    "original_price": 3000,
+    "unit": "per_stay",
+    "availability": 5,
+    "popularity": 71,
+    "tags": ["time", "convenience"],
+    "applicable_to": ["all"]
+  },
+  {
+    "offer_id": "ROOM_UPGRADE",
+    "category": "room",
+    "title": {
+      "en": "Room Upgrade",
+      "ja": "ルームアップグレード",
+      "ko": "룸 업그레이드",
+      "zh": "房间升级"
+    },
+    "description": {
+      "en": "Upgrade to a Superior room with city view",
+      "ja": "シティビューのスペリオールルームにアップグレード",
+      "ko": "시티뷰 슈피리어 룸으로 업그레이드",
+      "zh": "升级至城市景观高级客房"
+    },
+    "price": 12000,
+    "original_price": 20000,
+    "unit": "per_night",
+    "availability": 2,
+    "popularity": 45,
+    "tags": ["luxury", "view"],
+    "applicable_to": ["Standard Single", "Standard Twin", "Deluxe Twin", "Deluxe Double"]
+  },
+  {
+    "offer_id": "BREAKFAST",
+    "category": "dining",
+    "title": {
+      "en": "Japanese Breakfast Buffet",
+      "ja": "和洋朝食ビュッフェ",
+      "ko": "일식 조식 뷔페",
+      "zh": "日式早餐自助"
+    },
+    "description": {
+      "en": "Start your day with our premium Japanese and Western breakfast buffet",
+      "ja": "和洋ブッフェで特別な朝のひとときを",
+      "ko": "프리미엄 일식·양식 조식 뷔페로 하루를 시작하세요",
+      "zh": "在我们精致的日式西式早餐自助餐厅开启美好一天"
+    },
+    "price": 4200,
+    "original_price": null,
+    "unit": "per_person_per_day",
+    "availability": 20,
+    "popularity": 68,
+    "tags": ["food", "morning"],
+    "applicable_to": ["all"]
+  },
+  {
+    "offer_id": "SPA",
+    "category": "wellness",
+    "title": {
+      "en": "Zen Spa 60min",
+      "ja": "禅スパ 60分",
+      "ko": "젠 스파 60분",
+      "zh": "禅意水疗 60分钟"
+    },
+    "description": {
+      "en": "Rejuvenate with our signature Japanese-inspired spa treatment",
+      "ja": "日本の伝統美容に着想を得たシグネチャーSPAトリートメント",
+      "ko": "일본 전통에서 영감을 받은 시그니처 스파 트리트먼트",
+      "zh": "体验以日本传统为灵感的招牌水疗护理"
+    },
+    "price": 8500,
+    "original_price": 12000,
+    "unit": "per_person",
+    "availability": 4,
+    "popularity": 38,
+    "tags": ["wellness", "relaxation"],
+    "applicable_to": ["all"]
+  },
+  {
+    "offer_id": "AIRPORT_TRANSFER",
+    "category": "transport",
+    "title": {
+      "en": "Airport Transfer",
+      "ja": "空港送迎",
+      "ko": "공항 픽업",
+      "zh": "机场接送"
+    },
+    "description": {
+      "en": "Private car transfer to/from Narita or Haneda Airport",
+      "ja": "成田・羽田空港への専用車送迎サービス",
+      "ko": "나리타·하네다 공항 전용 차량 픽업 서비스",
+      "zh": "成田·羽田机场专车接送服务"
+    },
+    "price": 15000,
+    "original_price": null,
+    "unit": "per_trip",
+    "availability": 8,
+    "popularity": 55,
+    "tags": ["transport", "convenience"],
+    "applicable_to": ["all"]
+  },
+  {
+    "offer_id": "SAKE_TASTING",
+    "category": "experience",
+    "title": {
+      "en": "Japanese Sake Tasting",
+      "ja": "日本酒テイスティング",
+      "ko": "일본 사케 테이스팅",
+      "zh": "日本清酒品鉴"
+    },
+    "description": {
+      "en": "Curated sake tasting session with a certified sake sommelier",
+      "ja": "認定利き酒師によるセレクト日本酒テイスティング体験",
+      "ko": "공인 사케 소믈리에와 함께하는 특별 사케 테이스팅",
+      "zh": "由认证清酒侍酒师主持的精选清酒品鉴体验"
+    },
+    "price": 5500,
+    "original_price": 8000,
+    "unit": "per_person",
+    "availability": 6,
+    "popularity": 42,
+    "tags": ["culture", "food", "experience"],
+    "applicable_to": ["all"]
+  },
+  {
+    "offer_id": "BUNDLE_EARLY_BREAKFAST",
+    "category": "bundle",
+    "title": {
+      "en": "Early Bird Bundle",
+      "ja": "アーリーバードセット",
+      "ko": "얼리버드 번들",
+      "zh": "早鸟套餐"
+    },
+    "description": {
+      "en": "Early Check-in + Breakfast Buffet (2 persons) — Best Value",
+      "ja": "アーリーチェックイン + 朝食ビュッフェ（2名様）— お得なセット",
+      "ko": "얼리 체크인 + 조식 뷔페 (2인) — 베스트 밸류",
+      "zh": "提前入住 + 早餐自助（2人）— 超值套餐"
+    },
+    "price": 6800,
+    "original_price": 11700,
+    "unit": "per_stay",
+    "availability": 3,
+    "popularity": 89,
+    "tags": ["bundle", "save", "best_deal"],
+    "applicable_to": ["all"],
+    "includes": ["EARLY_CHECKIN", "BREAKFAST"]
+  }
+]

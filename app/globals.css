@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* ── Color tokens ──────────────────────────────────── */
+:root {
+  --shinryoku:   #5B8A3C;   /* 若葉グリーン (main)     */
+  --wakaba:      #A8C97F;   /* 淡い若葉   (sub)        */
+  --komorebi-c:  #F5E6C8;   /* 木漏れ日の暖色           */
+  --sora:        #C8DFF0;   /* 空色                    */
+  --bg:          #F8F6F0;   /* 和紙オフホワイト          */
+  --sumi:        #2C4A1E;   /* 深緑ダーク (text)        */
+  --gold:        #B8963E;   /* アクセントゴールド         */
+  --matcha-lt:   #F0F4EC;   /* 薄い若葉セクション背景     */
+  --card:        #FFFFFF;
+}
+
+@theme inline {
+  --color-shinryoku:  var(--shinryoku);
+  --color-wakaba:     var(--wakaba);
+  --color-sumi:       var(--sumi);
+  --color-bg:         var(--bg);
+  --color-matcha-lt:  var(--matcha-lt);
+  --color-gold:       var(--gold);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--sumi);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Animations ─────────────────────────────────────── */
+
+/* カードフェードイン */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fadeInUp 0.4s ease both; }
+
+/* ボタンバウンス */
+@keyframes buttonBounce {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(0.95); }
+  65%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.bounce-click { animation: buttonBounce 0.35s ease-out; }
+
+/* カートバウンス */
+@keyframes cartBounce {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.08); }
+  60%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+.cart-bounce { animation: cartBounce 0.4s ease-out; }
+
+/* 完了画面 スケールイン */
+@keyframes scaleIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.scale-in { animation: scaleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+/* 葉の揺れ */
+@keyframes leafSway {
+  from { transform: rotate(-2deg); }
+  to   { transform: rotate(2deg); }
+}
+.leaf-sway {
+  transform-origin: center 85%;
+  animation: leafSway 3s ease-in-out infinite alternate;
+}
+.leaf-sway-2 {
+  transform-origin: center 85%;
+  animation: leafSway 3.5s ease-in-out 0.7s infinite alternate;
+}
+
+/* 木漏れ日の明滅 */
+@keyframes komorebi {
+  0%, 100% { opacity: 0.3; transform: scale(1);   }
+  50%       { opacity: 0.65; transform: scale(1.08); }
+}
+.komorebi   { animation: komorebi 4s   ease-in-out infinite; }
+.komorebi-2 { animation: komorebi 4.8s ease-in-out 1s    infinite; }
+.komorebi-3 { animation: komorebi 3.6s ease-in-out 2s    infinite; }
+.komorebi-4 { animation: komorebi 5.2s ease-in-out 0.5s  infinite; }
+.komorebi-5 { animation: komorebi 4.3s ease-in-out 1.8s  infinite; }
+
+/* ── Scrollbar ───────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Skeleton ────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #eaeae0 25%, #f4f4ec 50%, #eaeae0 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 6px;
+}
