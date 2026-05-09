@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { GeneratedOffer } from '@/types'
 import { useCart } from '@/context/CartContext'
+import { useLang } from '@/context/LangContext'
 
 const CATEGORY_ICON: Record<string, string> = {
   room:       '🛏️',
@@ -11,14 +12,6 @@ const CATEGORY_ICON: Record<string, string> = {
   transport:  '🚗',
   experience: '🍶',
   bundle:     '✨',
-}
-
-const UNIT_LABEL: Record<string, string> = {
-  per_stay:           'per stay',
-  per_night:          'per night',
-  per_person:         'per person',
-  per_person_per_day: 'per person / day',
-  per_trip:           'per trip',
 }
 
 function getBadgeStyle(badge: string) {
@@ -32,6 +25,7 @@ type Props = { offer: GeneratedOffer; index: number; fullWidth?: boolean }
 
 export default function OfferCard({ offer, index, fullWidth = false }: Props) {
   const { addItem, hasItem } = useCart()
+  const t = useLang()
   const [bouncing, setBouncing] = useState(false)
   const [hovered, setHovered]   = useState(false)
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -93,7 +87,7 @@ export default function OfferCard({ offer, index, fullWidth = false }: Props) {
             </h3>
             {offer.availability <= 5 && !offer.badge?.startsWith('Last') && (
               <p className="text-xs mt-0.5 font-medium" style={{ color: '#8B2020' }}>
-                Only {offer.availability} left
+                {t.onlyLeft(offer.availability)}
               </p>
             )}
           </div>
@@ -143,7 +137,7 @@ export default function OfferCard({ offer, index, fullWidth = false }: Props) {
             >
               ¥{offer.price.toLocaleString()}
             </span>
-            <p className="text-xs" style={{ color: '#B0B0A0' }}>{UNIT_LABEL[offer.unit] ?? offer.unit}</p>
+            <p className="text-xs" style={{ color: '#B0B0A0' }}>{t.units[offer.unit] ?? offer.unit}</p>
           </div>
 
           <button
@@ -158,7 +152,7 @@ export default function OfferCard({ offer, index, fullWidth = false }: Props) {
               cursor: added ? 'default' : 'pointer',
             }}
           >
-            {added ? '✓ Added' : 'Add +'}
+            {added ? t.addedBtn : t.addBtn}
           </button>
         </div>
       </div>

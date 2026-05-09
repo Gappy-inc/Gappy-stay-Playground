@@ -2,14 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Booking } from '@/types'
-import bookingsData from '@/data/bookings.json'
-
-function findBookingByExactName(name: string): Booking | undefined {
-  const n = name.trim().toLowerCase()
-  if (!n) return undefined
-  return (bookingsData as Booking[]).find((b) => b.guest_name.toLowerCase() === n)
-}
 
 /* ── Leaf illustration ──────────────────────────────── */
 function LeafIllustration() {
@@ -57,14 +49,24 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const [focused, setFocused] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(false)
     setLoading(true)
-    const booking = findBookingByExactName(name)
-    if (booking) {
-      router.push(`/offer/${booking.booking_id}`)
-    } else {
+    try {
+      const res = await fetch('/api/admin/bookings')
+      const { bookings } = await res.json()
+      const n = name.trim().toLowerCase()
+      const booking = bookings.find((b: { guest_name: string; booking_id: string }) =>
+        b.guest_name.toLowerCase() === n
+      )
+      if (booking) {
+        router.push(`/offer/${booking.booking_id}`)
+      } else {
+        setError(true)
+        setLoading(false)
+      }
+    } catch {
       setError(true)
       setLoading(false)
     }

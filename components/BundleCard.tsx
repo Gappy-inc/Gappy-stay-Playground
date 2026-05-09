@@ -3,19 +3,13 @@
 import { useState } from 'react'
 import { GeneratedOffer } from '@/types'
 import { useCart } from '@/context/CartContext'
-
-const UNIT_LABEL: Record<string, string> = {
-  per_stay:           'per stay',
-  per_night:          'per night',
-  per_person:         'per person',
-  per_person_per_day: 'per person / day',
-  per_trip:           'per trip',
-}
+import { useLang } from '@/context/LangContext'
 
 type Props = { offer: GeneratedOffer }
 
 export default function BundleCard({ offer }: Props) {
   const { addItem, hasItem } = useCart()
+  const t = useLang()
   const [bouncing, setBouncing] = useState(false)
   const added   = hasItem(offer.offer_id)
   const savings = offer.original_price ? offer.original_price - offer.price : null
@@ -43,7 +37,7 @@ export default function BundleCard({ offer }: Props) {
         style={{ background: '#B8963E' }}
       >
         <span className="text-white text-xs font-semibold" style={{ letterSpacing: '0.12em' }}>
-          おすすめセット
+          {t.bundleLabel}
         </span>
         {savings && (
           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
@@ -101,7 +95,7 @@ export default function BundleCard({ offer }: Props) {
                 ¥{offer.price.toLocaleString()}
               </span>
               <span className="text-xs" style={{ color: '#888' }}>
-                {UNIT_LABEL[offer.unit] ?? offer.unit}
+                {t.units[offer.unit] ?? offer.unit}
               </span>
             </div>
           </div>
@@ -117,7 +111,7 @@ export default function BundleCard({ offer }: Props) {
               cursor: added ? 'default' : 'pointer',
             }}
           >
-            {added ? '✓ Added' : 'Add Bundle +'}
+            {added ? t.addedBtn : t.addBundleBtn}
           </button>
         </div>
       </div>

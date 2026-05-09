@@ -35,3 +35,11 @@ export function addRuntimeOrder(order: Order): void {
     writeJSON('runtime-orders.json', orders)
   }
 }
+
+export function getPausedOfferIds(): string[] {
+  return readJSON<string[]>('runtime-paused-offers.json', [])
+}
+
+export function setPausedOfferIds(ids: string[]): void {
+  writeJSON('runtime-paused-offers.json', ids)
+}

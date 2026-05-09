@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Booking, OfferTemplate, GeneratedOffer } from '@/types'
 import { detectChannel } from '@/lib/channel'
 import { CartProvider } from '@/context/CartContext'
+import { LangProvider } from '@/context/LangContext'
+import { getStrings } from '@/lib/i18n'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import OfferCard from '@/components/OfferCard'
 import BundleCard from '@/components/BundleCard'
@@ -192,15 +194,17 @@ export default function OfferPageClient({ booking, offerTemplates }: Props) {
   let bgIndex = 0
 
   const introText = SECTION_INTRO[lang] ?? SECTION_INTRO['en']
+  const t = getStrings(lang)
 
   return (
+    <LangProvider lang={lang}>
     <CartProvider>
       <div className="min-h-screen" style={{ background: '#F8F6F0' }}>
 
         {/* Top nav */}
         <div className="bg-white px-5 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid #F0EBE0' }}>
           <a href="/" className="text-xs transition-colors" style={{ color: '#A8C97F', letterSpacing: '0.05em' }}>
-            ← Back
+            {t.back}
           </a>
           <span style={{ color: '#D4C5A9' }}>|</span>
           <span className="text-xs font-medium" style={{ color: '#5B8A3C', letterSpacing: '0.08em' }}>▶ Gappy Stay</span>
@@ -275,7 +279,7 @@ export default function OfferPageClient({ booking, offerTemplates }: Props) {
               className="text-center py-16 text-sm"
               style={{ color: '#bbb', letterSpacing: '0.05em' }}
             >
-              ─ No offers available at this time ─
+              {t.noOffers}
             </div>
           )}
         </div>
@@ -283,5 +287,6 @@ export default function OfferPageClient({ booking, offerTemplates }: Props) {
         <CartDrawer />
       </div>
     </CartProvider>
+    </LangProvider>
   )
 }

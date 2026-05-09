@@ -3,24 +3,20 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CartItem } from '@/types'
-
-const UNIT_LABEL: Record<string, string> = {
-  per_stay:           'per stay',
-  per_night:          'per night',
-  per_person:         'per person',
-  per_person_per_day: 'per person / day',
-  per_trip:           'per trip',
-}
+import { getStrings } from '@/lib/i18n'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const [items, setItems] = useState<CartItem[]>([])
+  const [items, setItems]   = useState<CartItem[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [lang, setLang]     = useState('en')
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('gappy-cart')
+      const saved      = localStorage.getItem('gappy-cart')
+      const bookingRaw = localStorage.getItem('gappy-current-booking')
       if (saved) setItems(JSON.parse(saved))
+      if (bookingRaw) setLang(JSON.parse(bookingRaw).language ?? 'en')
     } catch {}
     setLoaded(true)
   }, [])
@@ -31,6 +27,7 @@ export default function CheckoutPage() {
     localStorage.setItem('gappy-cart', JSON.stringify(updated))
   }
 
+  const t     = getStrings(lang)
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
   if (!loaded) return null
@@ -42,7 +39,7 @@ export default function CheckoutPage() {
         style={{ background: 'linear-gradient(170deg, #F8F6F0 0%, #F0F4EC 100%)' }}
       >
         <p className="text-3xl">🛒</p>
-        <p className="text-sm" style={{ color: '#999' }}>Your cart is empty</p>
+        <p className="text-sm" style={{ color: '#999' }}>{t.cartEmpty}</p>
         <button
           onClick={() => router.push('/')}
           className="text-sm px-6 py-3"
@@ -56,7 +53,7 @@ export default function CheckoutPage() {
             cursor: 'pointer',
           }}
         >
-          ← Back
+          {t.back}
         </button>
       </div>
     )
@@ -72,16 +69,13 @@ export default function CheckoutPage() {
           className="text-xs mb-5 block transition-colors"
           style={{ color: '#A8C97F', letterSpacing: '0.05em' }}
         >
-          ← Back
+          {t.back}
         </button>
-        <h1
-          className="text-2xl font-medium"
-          style={{ color: '#2C4A1E', letterSpacing: '0.02em' }}
-        >
-          Your Add-ons
+        <h1 className="text-2xl font-medium" style={{ color: '#2C4A1E', letterSpacing: '0.02em' }}>
+          {t.yourAddons}
         </h1>
         <p className="text-xs mt-1" style={{ color: '#7A8C70', letterSpacing: '0.05em' }}>
-          Review before confirming
+          {t.reviewBefore}
         </p>
       </div>
 
@@ -98,7 +92,7 @@ export default function CheckoutPage() {
                 {item.title}
               </p>
               <p className="text-xs mt-0.5" style={{ color: '#B0B0A0' }}>
-                {UNIT_LABEL[item.unit] ?? item.unit}
+                {t.units[item.unit] ?? item.unit}
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -125,13 +119,13 @@ export default function CheckoutPage() {
           className="flex items-center justify-between py-4 mb-1"
           style={{ borderTop: '2px solid #2C4A1E' }}
         >
-          <span className="text-sm font-semibold" style={{ color: '#2C4A1E' }}>Total</span>
+          <span className="text-sm font-semibold" style={{ color: '#2C4A1E' }}>{t.total}</span>
           <span className="font-semibold" style={{ fontSize: '1.75rem', color: '#5B8A3C' }}>
             ¥{total.toLocaleString()}
           </span>
         </div>
         <p className="text-xs mb-6" style={{ color: '#B0B0A0' }}>
-          Charges will be added to your room bill at check-out.
+          {t.roomBillNote}
         </p>
 
         <button
@@ -147,7 +141,7 @@ export default function CheckoutPage() {
             cursor: 'pointer',
           }}
         >
-          Confirm & Pay
+          {t.confirmPay}
         </button>
       </div>
     </div>
