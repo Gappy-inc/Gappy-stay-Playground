@@ -25,6 +25,10 @@ export async function getRuntimeOrders(): Promise<Order[]> {
   return data ?? []
 }
 
+export async function setRuntimeOrders(orders: Order[]): Promise<void> {
+  await redis.set(KEY_ORDERS, orders)
+}
+
 export async function addRuntimeOrder(order: Order): Promise<void> {
   const orders = await getRuntimeOrders()
   if (!orders.find((o) => o.order_id === order.order_id)) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRuntimeOrders, addRuntimeOrder } from '@/lib/runtime-store'
+import { getRuntimeOrders, addRuntimeOrder, setRuntimeOrders } from '@/lib/runtime-store'
 import { Order } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -11,5 +11,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const order: Order = await req.json()
   await addRuntimeOrder(order)
+  return NextResponse.json({ ok: true })
+}
+
+export async function DELETE() {
+  await setRuntimeOrders([])
   return NextResponse.json({ ok: true })
 }

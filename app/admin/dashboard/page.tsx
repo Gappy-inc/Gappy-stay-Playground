@@ -334,7 +334,7 @@ function Sidebar({ active, onNav, offerCount }: { active:Page; onNav:(p:Page)=>v
 }
 
 // ── TopBar ────────────────────────────────────────────────────
-function TopBar({ title, onRefresh }: { title:string; onRefresh:()=>void }) {
+function TopBar({ title, onRefresh, onClearOrders }: { title:string; onRefresh:()=>void; onClearOrders:()=>void }) {
   const now = new Date()
   const d = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
   return (
@@ -352,6 +352,11 @@ function TopBar({ title, onRefresh }: { title:string; onRefresh:()=>void }) {
           background:MATCHA, border:`1px solid ${BORDER}`,
           borderRadius:7, cursor:'pointer', fontFamily:'inherit', letterSpacing:'0.04em',
         }}>↻ Refresh</button>
+        <button onClick={onClearOrders} style={{
+          fontSize:11, color:RED_SOFT, padding:'5px 12px',
+          background:'rgba(139,32,32,0.06)', border:`1px solid rgba(139,32,32,0.2)`,
+          borderRadius:7, cursor:'pointer', fontFamily:'inherit', letterSpacing:'0.04em',
+        }}>✕ Clear Orders</button>
         <div style={{ fontSize:11, color:SUBTEXT, padding:'5px 12px', background:MATCHA, border:`1px solid ${BORDER}`, borderRadius:7, letterSpacing:'0.04em' }}>{d}</div>
         <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:11, color:SHINRYOKU, padding:'5px 12px', background:'rgba(91,138,60,0.08)', border:`1px solid rgba(91,138,60,0.2)`, borderRadius:7, letterSpacing:'0.06em' }}>
           <span style={{ width:6, height:6, background:SHINRYOKU, borderRadius:'50%', display:'inline-block', animation:'live-pulse 2s infinite' }} />
@@ -1187,7 +1192,11 @@ export default function DashboardPage() {
       <Sidebar active={page} onNav={setPage} offerCount={offerTemplates.length} />
 
       <main style={{ marginLeft:240, minHeight:'100vh' }}>
-        <TopBar title={titles[page]} onRefresh={load} />
+        <TopBar title={titles[page]} onRefresh={load} onClearOrders={async () => {
+          if (!confirm('Clear all order data? This cannot be undone.')) return
+          await fetch('/api/admin/orders', { method: 'DELETE' })
+          load()
+        }} />
 
         <div style={{ padding:28 }}>
           {loading ? (
