@@ -9,10 +9,10 @@ type Props = {
 
 export default async function OfferPage({ params }: Props) {
   const { bookingId } = await params
-  const booking = getBookingById(bookingId)
+  const booking = await getBookingById(bookingId)
   if (!booking) notFound()
 
-  const offerTemplates = getAllOffers()
+  const offerTemplates = await getAllOffers()
 
   return <OfferPageClient booking={booking} offerTemplates={offerTemplates} />
 }

@@ -2,10 +2,12 @@ import { Booking } from '@/types'
 import bookingsData from '@/data/bookings.json'
 import { getRuntimeBookings } from '@/lib/runtime-store'
 
-export function getAllBookings(): Booking[] {
-  return [...(bookingsData as Booking[]), ...getRuntimeBookings()]
+export async function getAllBookings(): Promise<Booking[]> {
+  const runtime = await getRuntimeBookings()
+  return [...(bookingsData as Booking[]), ...runtime]
 }
 
-export function getBookingById(id: string): Booking | undefined {
-  return getAllBookings().find((b) => b.booking_id === id)
+export async function getBookingById(id: string): Promise<Booking | undefined> {
+  const all = await getAllBookings()
+  return all.find((b) => b.booking_id === id)
 }

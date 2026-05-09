@@ -7,14 +7,14 @@ export async function POST(req: NextRequest) {
   if (!Array.isArray(bookings)) {
     return NextResponse.json({ error: 'Invalid data' }, { status: 400 })
   }
-  const existing = getRuntimeBookings()
+  const existing = await getRuntimeBookings()
   const existingIds = new Set(existing.map((b) => b.booking_id))
   const newBookings = bookings.filter((b) => b.guest_name && !existingIds.has(b.booking_id))
-  setRuntimeBookings([...existing, ...newBookings])
+  await setRuntimeBookings([...existing, ...newBookings])
   return NextResponse.json({ added: newBookings.length, total: existing.length + newBookings.length })
 }
 
 export async function DELETE() {
-  setRuntimeBookings([])
+  await setRuntimeBookings([])
   return NextResponse.json({ ok: true })
 }

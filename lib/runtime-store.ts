@@ -1,45 +1,42 @@
-import fs from 'fs'
-import path from 'path'
+import { Redis } from '@upstash/redis'
 import type { Booking, Order } from '@/types'
 
-const DATA_DIR = path.join(process.cwd(), 'data')
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+})
 
-function readJSON<T>(file: string, fallback: T): T {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(DATA_DIR, file), 'utf-8'))
-  } catch {
-    return fallback
-  }
+const HOTEL_ID = 'default'
+const KEY_BOOKINGS     = `hotel:${HOTEL_ID}:bookings`
+const KEY_ORDERS       = `hotel:${HOTEL_ID}:orders`
+const KEY_PAUSED_OFFERS = `hotel:${HOTEL_ID}:paused-offers`
+
+export async function getRuntimeBookings(): Promise<Booking[]> {
+  const data = await redis.get<Booking[]>(KEY_BOOKINGS)
+  return data ?? []
 }
 
-function writeJSON(file: string, data: unknown): void {
-  fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data, null, 2))
+export async function setRuntimeBookings(bookings: Booking[]): Promise<void> {
+  await redis.set(KEY_BOOKINGS, bookings)
 }
 
-export function getRuntimeBookings(): Booking[] {
-  return readJSON<Booking[]>('runtime-bookings.json', [])
+export async function getRuntimeOrders(): Promise<Order[]> {
+  const data = await redis.get<Order[]>(KEY_ORDERS)
+  return data ?? []
 }
 
-export function setRuntimeBookings(bookings: Booking[]): void {
-  writeJSON('runtime-bookings.json', bookings)
-}
-
-export function getRuntimeOrders(): Order[] {
-  return readJSON<Order[]>('runtime-orders.json', [])
-}
-
-export function addRuntimeOrder(order: Order): void {
-  const orders = getRuntimeOrders()
+export async function addRuntimeOrder(order: Order): Promise<void> {
+  const orders = await getRuntimeOrders()
   if (!orders.find((o) => o.order_id === order.order_id)) {
-    orders.push(order)
-    writeJSON('runtime-orders.json', orders)
+    await redis.set(KEY_ORDERS, [...orders, order])
   }
 }
 
-export function getPausedOfferIds(): string[] {
-  return readJSON<string[]>('runtime-paused-offers.json', [])
+export async function getPausedOfferIds(): Promise<string[]> {
+  const data = await redis.get<string[]>(KEY_PAUSED_OFFERS)
+  return data ?? []
 }
 
-export function setPausedOfferIds(ids: string[]): void {
-  writeJSON('runtime-paused-offers.json', ids)
+export async function setPausedOfferIds(ids: string[]): Promise<void> {
+  await redis.set(KEY_PAUSED_OFFERS, ids)
 }
