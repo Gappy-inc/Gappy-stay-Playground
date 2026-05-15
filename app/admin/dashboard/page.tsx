@@ -399,6 +399,7 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
   const [natDropdownOpen, setNatDropdownOpen] = useState(false)
   const [natSearch,       setNatSearch]       = useState('')
   const natDropdownRef = useRef<HTMLDivElement>(null)
+  const [otaMode,         setOtaMode]         = useState(false)
   const [otaFilter,       setOtaFilter]       = useState<string[]>([])
   const [otaDropdownOpen, setOtaDropdownOpen] = useState(false)
   const otaDropdownRef = useRef<HTMLDivElement>(null)
@@ -456,9 +457,19 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
   const filteredBookings = useMemo(() => bookings.filter(b => {
     const matchName = b.guest_name.toLowerCase().includes(guestSearch.toLowerCase())
     const matchNat  = natFilter === '' || b.nationality.toUpperCase().slice(0,2) === natFilter
-    const matchOTA  = otaFilter.length === 0 || otaFilter.includes(normalizeOTA(b.booking_source))
+    const matchOTA  = !otaMode || otaFilter.length === 0 || otaFilter.includes(normalizeOTA(b.booking_source))
     return matchName && matchNat && matchOTA
-  }), [bookings, guestSearch, natFilter, otaFilter])
+  }), [bookings, guestSearch, natFilter, otaFilter, otaMode])
+
+  const bookingsByOTA = useMemo(() => {
+    const groups: Record<string, Booking[]> = {}
+    filteredBookings.forEach(b => {
+      const ota = normalizeOTA(b.booking_source)
+      if (!groups[ota]) groups[ota] = []
+      groups[ota].push(b)
+    })
+    return groups
+  }, [filteredBookings])
 
   const totalRev = orders.reduce((s,o) => s+o.total, 0)
   const cvr = bookings.length > 0 ? Math.round((orders.length / bookings.length) * 100) : 0
@@ -530,8 +541,28 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
         {/* Toolbar: search + country filter + link */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14, flexWrap:'wrap', gap:10 }}>
 
-          {/* Left group: search + country filter side by side */}
+          {/* Left group: OTA toggle + search + filters */}
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            {/* OTA Mode toggle button */}
+            <button
+              onClick={() => { setOtaMode(m => !m); setOtaFilter([]); setOtaDropdownOpen(false) }}
+              style={{
+                display:'flex', alignItems:'center', gap:6,
+                padding:'8px 13px', borderRadius:8, fontSize:12, fontWeight:600,
+                fontFamily:'inherit', cursor:'pointer', letterSpacing:'0.04em',
+                background: otaMode ? SHINRYOKU : CARD,
+                color:      otaMode ? '#fff' : SUBTEXT,
+                border:     otaMode ? `1px solid ${SHINRYOKU}` : `1px solid ${BORDER}`,
+                boxShadow: otaMode ? '0 2px 8px rgba(91,138,60,0.25)' : '0 1px 3px rgba(0,0,0,0.04)',
+                transition:'all 0.18s', flexShrink:0,
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/>
+                <rect x="3" y="13" width="7" height="5" rx="1"/><rect x="14" y="13" width="7" height="5" rx="1"/>
+              </svg>
+              OTA View
+            </button>
+
             {/* Name search */}
             <div style={{ position:'relative' }}>
               <svg style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:GRAY, pointerEvents:'none' }}
@@ -677,8 +708,8 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
             )}
             </div> {/* end nationality dropdown */}
 
-            {/* OTA filter dropdown */}
-            <div ref={otaDropdownRef} style={{ position:'relative' }}>
+            {/* OTA filter dropdown — only when OTA mode is on */}
+            {otaMode && <div ref={otaDropdownRef} style={{ position:'relative' }}>
               <button
                 onClick={() => setOtaDropdownOpen(o => !o)}
                 style={{
@@ -799,7 +830,7 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
                   </div>
                 </div>
               )}
-            </div> {/* end OTA dropdown */}
+            </div>} {/* end OTA dropdown */}
 
           </div> {/* end left group */}
 
@@ -820,15 +851,9 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
           </div>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:12 }}>
-          {filteredBookings.length === 0 ? (
-            <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'32px 0', color:GRAY, fontSize:13 }}>
-              No guests match your search
-            </div>
-          ) : null}
-          {filteredBookings.map(b => {
+        {(() => {
+          const renderCard = (b: Booking) => {
             const color = NAT_COLOR[b.nationality] || SHINRYOKU
-            const flag = countryFlag(b.nationality)
             const ch = detectChannel(b.phone)
             return (
               <Link key={b.booking_id} href={`/offer/${b.booking_id}`} target="_blank"
@@ -845,7 +870,6 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.03)'; (e.currentTarget as HTMLElement).style.background = BG }}
               >
                 <div style={{ display:'flex', alignItems:'center', gap:9, marginBottom:9 }}>
-                  {/* Flag + code badge */}
                   <div style={{ width:40, background:CARD, border:`1px solid ${BORDER}`, borderRadius:8, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'5px 3px', gap:3, flexShrink:0 }}>
                     <img src={flagUrl(b.nationality, '24x18')} alt={`${b.nationality} flag`} width={24} height={18} style={{ borderRadius:2, display:'block' }} />
                     <span style={{ fontSize:8, fontWeight:700, color:SUBTEXT, letterSpacing:'0.06em', lineHeight:1 }}>{b.nationality.toUpperCase().slice(0,2)}</span>
@@ -855,16 +879,8 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
                     <div style={{ fontSize:13, fontWeight:500, color:SUMI, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{b.guest_name}</div>
                   </div>
                   {runtimeIds.has(b.booking_id) && (
-                    <button
-                      onClick={e => handleDeleteBooking(b.booking_id, e)}
-                      title="Remove guest"
-                      style={{
-                        width:22, height:22, borderRadius:5, border:`1px solid rgba(139,32,32,0.2)`,
-                        background:'rgba(139,32,32,0.06)', color:RED_SOFT, cursor:'pointer',
-                        display:'flex', alignItems:'center', justifyContent:'center',
-                        fontSize:12, flexShrink:0, lineHeight:1,
-                        transition:'all 0.15s',
-                      }}
+                    <button onClick={e => handleDeleteBooking(b.booking_id, e)} title="Remove guest"
+                      style={{ width:22, height:22, borderRadius:5, border:`1px solid rgba(139,32,32,0.2)`, background:'rgba(139,32,32,0.06)', color:RED_SOFT, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, flexShrink:0, lineHeight:1, transition:'all 0.15s' }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,32,32,0.14)' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,32,32,0.06)' }}
                     >×</button>
@@ -880,8 +896,44 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
                 <div style={{ fontSize:10, color:WAKABA, letterSpacing:'0.06em', paddingTop:8, borderTop:`1px dashed ${BORDER2}` }}>Open offer page ↗</div>
               </Link>
             )
-          })}
-        </div>
+          }
+
+          if (!otaMode) {
+            return (
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:12 }}>
+                {filteredBookings.length === 0
+                  ? <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'32px 0', color:GRAY, fontSize:13 }}>No guests match your search</div>
+                  : filteredBookings.map(b => renderCard(b))}
+              </div>
+            )
+          }
+
+          const groups = uniqueOTAs.filter(ota => bookingsByOTA[ota]?.length > 0)
+          if (groups.length === 0) {
+            return <div style={{ textAlign:'center', padding:'32px 0', color:GRAY, fontSize:13 }}>No guests match your filters</div>
+          }
+          return (
+            <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+              {groups.map(ota => {
+                const otaColor = OTA_COLOR[ota] || SHINRYOKU
+                return (
+                  <div key={ota}>
+                    {/* OTA section header */}
+                    <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:12 }}>
+                      <span style={{ width:9, height:9, borderRadius:'50%', background:otaColor, flexShrink:0, display:'inline-block', boxShadow:`0 0 0 3px ${otaColor}20` }} />
+                      <span style={{ fontSize:11, fontWeight:700, color:otaColor, textTransform:'uppercase', letterSpacing:'0.14em' }}>{ota}</span>
+                      <span style={{ fontSize:10, color:GRAY, fontWeight:400 }}>{bookingsByOTA[ota].length} guest{bookingsByOTA[ota].length !== 1 ? 's' : ''}</span>
+                      <div style={{ flex:1, borderTop:`1px solid ${BORDER}` }} />
+                    </div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:12 }}>
+                      {bookingsByOTA[ota].map(b => renderCard(b))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
       </SectionCard>
 
       {/* KPI Cards */}
