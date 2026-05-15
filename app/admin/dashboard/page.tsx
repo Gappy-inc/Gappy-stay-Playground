@@ -541,28 +541,8 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
         {/* Toolbar: search + country filter + link */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14, flexWrap:'wrap', gap:10 }}>
 
-          {/* Left group: OTA toggle + search + filters */}
+          {/* Left group: search + filters */}
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            {/* OTA Mode toggle button */}
-            <button
-              onClick={() => { setOtaMode(m => !m); setOtaFilter([]); setOtaDropdownOpen(false) }}
-              style={{
-                display:'flex', alignItems:'center', gap:6,
-                padding:'8px 13px', borderRadius:8, fontSize:12, fontWeight:600,
-                fontFamily:'inherit', cursor:'pointer', letterSpacing:'0.04em',
-                background: otaMode ? SHINRYOKU : CARD,
-                color:      otaMode ? '#fff' : SUBTEXT,
-                border:     otaMode ? `1px solid ${SHINRYOKU}` : `1px solid ${BORDER}`,
-                boxShadow: otaMode ? '0 2px 8px rgba(91,138,60,0.25)' : '0 1px 3px rgba(0,0,0,0.04)',
-                transition:'all 0.18s', flexShrink:0,
-              }}>
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/>
-                <rect x="3" y="13" width="7" height="5" rx="1"/><rect x="14" y="13" width="7" height="5" rx="1"/>
-              </svg>
-              OTA View
-            </button>
-
             {/* Name search */}
             <div style={{ position:'relative' }}>
               <svg style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:GRAY, pointerEvents:'none' }}
@@ -707,6 +687,26 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
               </div>
             )}
             </div> {/* end nationality dropdown */}
+
+            {/* OTA View toggle button */}
+            <button
+              onClick={() => { setOtaMode(m => !m); setOtaFilter([]); setOtaDropdownOpen(false) }}
+              style={{
+                display:'flex', alignItems:'center', gap:6,
+                padding:'8px 13px', borderRadius:8, fontSize:12, fontWeight:600,
+                fontFamily:'inherit', cursor:'pointer', letterSpacing:'0.04em',
+                background: otaMode ? SHINRYOKU : CARD,
+                color:      otaMode ? '#fff' : SUBTEXT,
+                border:     otaMode ? `1px solid ${SHINRYOKU}` : `1px solid ${BORDER}`,
+                boxShadow: otaMode ? '0 2px 8px rgba(91,138,60,0.25)' : '0 1px 3px rgba(0,0,0,0.04)',
+                transition:'all 0.18s', flexShrink:0,
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/>
+                <rect x="3" y="13" width="7" height="5" rx="1"/><rect x="14" y="13" width="7" height="5" rx="1"/>
+              </svg>
+              OTA View
+            </button>
 
             {/* OTA filter dropdown — only when OTA mode is on */}
             {otaMode && <div ref={otaDropdownRef} style={{ position:'relative' }}>
