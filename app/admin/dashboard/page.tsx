@@ -106,6 +106,15 @@ function detectChannel(phone: string): 'LINE'|'WhatsApp'|'SMS'|'Email' {
 function normalizeOTA(source: string): string {
   if (!source || !source.trim()) return 'Direct'
   const s = source.toLowerCase().trim()
+  // Direct booking — JP / EN / ZH / KO / DE / FR / ES
+  if (
+    s.includes('直販') || s.includes('直接') || s.includes('自社') ||
+    s.includes('公式') || s.includes('ホームページ') || s.includes('自社hp') ||
+    s.includes('官网') || s.includes('直订') || s.includes('직접') ||
+    s === 'direct' || s.includes('direct book') || s.includes('direct reserv') ||
+    s.includes('direkt') || s.includes('direktbuch') ||
+    s.includes('直接予約') || s === 'hp' || s === 'own site' || s === 'website'
+  ) return 'Direct'
   if (s.includes('booking') || s === 'bkg') return 'Booking.com'
   if (s.includes('expedia') || s === 'exp') return 'Expedia'
   if (s.includes('jalan') || s.includes('じゃらん') || s === 'jln') return 'じゃらん'
@@ -113,7 +122,6 @@ function normalizeOTA(source: string): string {
   if (s.includes('agoda') || s === 'aga') return 'Agoda'
   if (s.includes('airbnb')) return 'Airbnb'
   if (s.includes('trip') || s.includes('ctrip') || s === 'trp') return 'Trip.com'
-  if (s === 'direct' || s === '直接') return 'Direct'
   return source.trim().replace(/\b\w/g, c => c.toUpperCase())
 }
 
