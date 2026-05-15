@@ -908,7 +908,9 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
             )
           }
 
-          const groups = uniqueOTAs.filter(ota => bookingsByOTA[ota]?.length > 0)
+          const groups = uniqueOTAs
+            .filter(ota => bookingsByOTA[ota]?.length > 0)
+            .sort((a, b) => a === 'Direct' ? -1 : b === 'Direct' ? 1 : 0)
           if (groups.length === 0) {
             return <div style={{ textAlign:'center', padding:'32px 0', color:GRAY, fontSize:13 }}>No guests match your filters</div>
           }
