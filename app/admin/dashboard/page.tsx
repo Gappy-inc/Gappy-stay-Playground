@@ -103,6 +103,31 @@ function detectChannel(phone: string): 'LINE'|'WhatsApp'|'SMS'|'Email' {
   return 'Email'
 }
 
+function normalizeOTA(source: string): string {
+  if (!source || !source.trim()) return 'Direct'
+  const s = source.toLowerCase().trim()
+  if (s.includes('booking') || s === 'bkg') return 'Booking.com'
+  if (s.includes('expedia') || s === 'exp') return 'Expedia'
+  if (s.includes('jalan') || s.includes('じゃらん') || s === 'jln') return 'じゃらん'
+  if (s.includes('rakuten') || s.includes('楽天') || s === 'rtk') return '楽天トラベル'
+  if (s.includes('agoda') || s === 'aga') return 'Agoda'
+  if (s.includes('airbnb')) return 'Airbnb'
+  if (s.includes('trip') || s.includes('ctrip') || s === 'trp') return 'Trip.com'
+  if (s === 'direct' || s === '直接') return 'Direct'
+  return source.trim().replace(/\b\w/g, c => c.toUpperCase())
+}
+
+const OTA_COLOR: Record<string, string> = {
+  'Booking.com':  '#0071C2',
+  'Expedia':      '#00355F',
+  'じゃらん':     '#E8720C',
+  '楽天トラベル': '#BF0000',
+  'Agoda':        '#5A0099',
+  'Airbnb':       '#FF5A5F',
+  'Trip.com':     '#2577E3',
+  'Direct':       SHINRYOKU,
+}
+
 // ── Helpers ──────────────────────────────────────────────────
 function weeklyRevenue(orders: Order[]) {
   const labels: string[] = [], data: number[] = []
@@ -374,11 +399,17 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
   const [natDropdownOpen, setNatDropdownOpen] = useState(false)
   const [natSearch,       setNatSearch]       = useState('')
   const natDropdownRef = useRef<HTMLDivElement>(null)
+  const [otaFilter,       setOtaFilter]       = useState<string[]>([])
+  const [otaDropdownOpen, setOtaDropdownOpen] = useState(false)
+  const otaDropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (natDropdownRef.current && !natDropdownRef.current.contains(e.target as Node)) {
         setNatDropdownOpen(false); setNatSearch('')
+      }
+      if (otaDropdownRef.current && !otaDropdownRef.current.contains(e.target as Node)) {
+        setOtaDropdownOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClick)
@@ -407,11 +438,27 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
     return m
   }, [bookings])
 
+  const uniqueOTAs = useMemo(() => {
+    const seen = new Set<string>()
+    bookings.forEach(b => seen.add(normalizeOTA(b.booking_source)))
+    return Array.from(seen).sort()
+  }, [bookings])
+
+  const otaCountMap = useMemo(() => {
+    const m: Record<string, number> = {}
+    bookings.forEach(b => {
+      const k = normalizeOTA(b.booking_source)
+      m[k] = (m[k] || 0) + 1
+    })
+    return m
+  }, [bookings])
+
   const filteredBookings = useMemo(() => bookings.filter(b => {
     const matchName = b.guest_name.toLowerCase().includes(guestSearch.toLowerCase())
     const matchNat  = natFilter === '' || b.nationality.toUpperCase().slice(0,2) === natFilter
-    return matchName && matchNat
-  }), [bookings, guestSearch, natFilter])
+    const matchOTA  = otaFilter.length === 0 || otaFilter.includes(normalizeOTA(b.booking_source))
+    return matchName && matchNat && matchOTA
+  }), [bookings, guestSearch, natFilter, otaFilter])
 
   const totalRev = orders.reduce((s,o) => s+o.total, 0)
   const cvr = bookings.length > 0 ? Math.round((orders.length / bookings.length) * 100) : 0
@@ -629,10 +676,135 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
               </div>
             )}
             </div> {/* end nationality dropdown */}
+
+            {/* OTA filter dropdown */}
+            <div ref={otaDropdownRef} style={{ position:'relative' }}>
+              <button
+                onClick={() => setOtaDropdownOpen(o => !o)}
+                style={{
+                  display:'flex', alignItems:'center', gap:7,
+                  padding:'8px 12px', borderRadius:8, fontSize:13, fontWeight:500,
+                  fontFamily:'inherit', cursor:'pointer', letterSpacing:'0.02em',
+                  background: otaFilter.length > 0 ? 'rgba(0,113,194,0.08)' : CARD,
+                  color:      otaFilter.length > 0 ? '#0071C2' : SUBTEXT,
+                  border:     otaFilter.length > 0 ? '1px solid rgba(0,113,194,0.3)' : `1px solid ${BORDER}`,
+                  boxShadow:'0 1px 3px rgba(0,0,0,0.04)',
+                  transition:'all 0.15s', minWidth:130,
+                  justifyContent:'space-between',
+                }}>
+                <span style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ opacity:0.6 }}>
+                    <path d="M3 4h18M7 8h10M11 12h2M9 16h6"/>
+                  </svg>
+                  {otaFilter.length === 0
+                    ? 'All OTAs'
+                    : otaFilter.length === 1
+                      ? otaFilter[0]
+                      : `${otaFilter.length} OTAs`}
+                </span>
+                <span style={{ display:'flex', alignItems:'center', gap:4 }}>
+                  {otaFilter.length > 0 && (
+                    <span
+                      onClick={e => { e.stopPropagation(); setOtaFilter([]) }}
+                      style={{ fontSize:13, lineHeight:1, opacity:0.5, padding:'0 2px', cursor:'pointer' }}
+                      title="Clear filter">×</span>
+                  )}
+                  <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+                    style={{ opacity:0.5, transform: otaDropdownOpen ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }}>
+                    <path d="M6 9l6 6 6-6"/>
+                  </svg>
+                </span>
+              </button>
+
+              {otaDropdownOpen && (
+                <div style={{
+                  position:'absolute', top:'calc(100% + 6px)', left:0, zIndex:200,
+                  background:CARD, border:`1px solid ${BORDER}`,
+                  borderRadius:10, boxShadow:'0 6px 24px rgba(44,74,30,0.12)',
+                  minWidth:210, overflow:'hidden',
+                  animation:'fadeUp 0.15s ease',
+                }}>
+                  {/* Header */}
+                  <div style={{ padding:'10px 14px 8px', borderBottom:`1px solid ${BORDER}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <span style={{ fontSize:10, fontWeight:600, color:WAKABA, textTransform:'uppercase', letterSpacing:'0.14em' }}>OTA Source</span>
+                    {otaFilter.length > 0 && (
+                      <button onClick={() => setOtaFilter([])}
+                        style={{ fontSize:10, color:SUBTEXT, background:'none', border:'none', cursor:'pointer', padding:'0 2px', fontFamily:'inherit' }}>
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                  {/* All option */}
+                  <button
+                    onClick={() => { setOtaFilter([]); setOtaDropdownOpen(false) }}
+                    style={{
+                      width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
+                      padding:'9px 14px', fontSize:12, fontFamily:'inherit', cursor:'pointer',
+                      background: otaFilter.length === 0 ? MATCHA : 'transparent',
+                      color: otaFilter.length === 0 ? SHINRYOKU : SUMI,
+                      border:'none', borderBottom:`1px solid ${BORDER}`,
+                      fontWeight: otaFilter.length === 0 ? 600 : 400,
+                    }}>
+                    <span style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ opacity:0.5 }}>
+                        <path d="M3 4h18M7 8h10M11 12h2M9 16h6"/>
+                      </svg>
+                      All OTAs
+                    </span>
+                    <span style={{ fontSize:11, color:GRAY }}>{bookings.length}</span>
+                  </button>
+                  {/* OTA rows */}
+                  <div style={{ maxHeight:240, overflowY:'auto' }}>
+                    {uniqueOTAs.map(ota => {
+                      const active  = otaFilter.includes(ota)
+                      const color   = OTA_COLOR[ota] || SHINRYOKU
+                      return (
+                        <button key={ota}
+                          onClick={() => {
+                            setOtaFilter(prev =>
+                              prev.includes(ota) ? prev.filter(o => o !== ota) : [...prev, ota]
+                            )
+                          }}
+                          style={{
+                            width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
+                            padding:'9px 14px', fontSize:12, fontFamily:'inherit', cursor:'pointer',
+                            background: active ? `${color}10` : 'transparent',
+                            color: active ? color : SUMI,
+                            border:'none', borderBottom:`1px solid ${BORDER}`,
+                            fontWeight: active ? 600 : 400,
+                            transition:'background 0.12s',
+                          }}
+                          onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = BG }}
+                          onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                          <span style={{ display:'flex', alignItems:'center', gap:9 }}>
+                            <span style={{
+                              width:8, height:8, borderRadius:'50%',
+                              background: color, flexShrink:0, display:'inline-block',
+                            }} />
+                            {ota}
+                          </span>
+                          <span style={{ display:'flex', alignItems:'center', gap:6 }}>
+                            <span style={{ fontSize:11, color: active ? color : GRAY, background: active ? `${color}15` : MATCHA, padding:'1px 7px', borderRadius:10, fontWeight:500 }}>
+                              {otaCountMap[ota] || 0}
+                            </span>
+                            {active && (
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5">
+                                <path d="M20 6L9 17l-5-5"/>
+                              </svg>
+                            )}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div> {/* end OTA dropdown */}
+
           </div> {/* end left group */}
 
           <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
-            {(guestSearch || natFilter) && (
+            {(guestSearch || natFilter || otaFilter.length > 0) && (
               <span style={{ fontSize:11, color:SUBTEXT }}>
                 {filteredBookings.length} of {bookings.length}
               </span>
