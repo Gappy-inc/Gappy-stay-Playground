@@ -401,7 +401,7 @@ function TopBar({ title, onRefresh, onClearOrders }: { title:string; onRefresh:(
 }
 
 // ── Dashboard tab ─────────────────────────────────────────────
-function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingDeleted }: { orders:Order[]; bookings:Booking[]; runtimeIds:Set<string>; offerTemplates:OfferTemplate[]; onBookingDeleted:()=>void }) {
+function DashboardTab({ orders, bookings, runtimeIds, emailStatuses, onEmailSent, offerTemplates, onBookingDeleted }: { orders:Order[]; bookings:Booking[]; runtimeIds:Set<string>; emailStatuses:Record<string,EmailStatus>; onEmailSent:(id:string, status:EmailStatus)=>void; offerTemplates:OfferTemplate[]; onBookingDeleted:()=>void }) {
   const [guestSearch,     setGuestSearch]     = useState('')
   const [natFilter,       setNatFilter]       = useState('')
   const [natDropdownOpen, setNatDropdownOpen] = useState(false)
@@ -425,11 +425,33 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  const [emailSendState, setEmailSendState] = useState<Record<string,'loading'|'error'>>({})
+
   async function handleDeleteBooking(bookingId: string, e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
     await fetch(`/api/admin/bookings?id=${encodeURIComponent(bookingId)}`, { method: 'DELETE' })
     onBookingDeleted()
+  }
+
+  async function handleSendEmail(bookingId: string, e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setEmailSendState(s => ({ ...s, [bookingId]: 'loading' }))
+    try {
+      const res = await fetch('/api/send-offer-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      onEmailSent(bookingId, { sent: true, sentAt: data.sentAt })
+      setEmailSendState(s => { const n = { ...s }; delete n[bookingId]; return n })
+    } catch {
+      setEmailSendState(s => ({ ...s, [bookingId]: 'error' }))
+      setTimeout(() => setEmailSendState(s => { const n = { ...s }; delete n[bookingId]; return n }), 3000)
+    }
   }
 
   const uniqueNats = useMemo(() => {
@@ -901,7 +923,39 @@ function DashboardTab({ orders, bookings, runtimeIds, offerTemplates, onBookingD
                   ))}
                   <span style={{ fontSize:9, padding:'2px 7px', borderRadius:4, background:'rgba(91,138,60,0.1)', color:SHINRYOKU, textTransform:'uppercase', letterSpacing:'0.08em', fontWeight:500 }}>{ch}</span>
                 </div>
-                <div style={{ fontSize:10, color:WAKABA, letterSpacing:'0.06em', paddingTop:8, borderTop:`1px dashed ${BORDER2}` }}>Open offer page ↗</div>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingTop:8, borderTop:`1px dashed ${BORDER2}` }}>
+                  {(() => {
+                    const status   = emailStatuses[b.booking_id]
+                    const sending  = emailSendState[b.booking_id] === 'loading'
+                    const errored  = emailSendState[b.booking_id] === 'error'
+                    const sentAt   = status?.sentAt ? new Date(status.sentAt).toLocaleDateString('en-US', { month:'short', day:'numeric' }) : ''
+                    if (status?.sent) {
+                      return (
+                        <span style={{ fontSize:10, color:SHINRYOKU, display:'flex', alignItems:'center', gap:4 }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={SHINRYOKU} strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                          Sent {sentAt}
+                        </span>
+                      )
+                    }
+                    return (
+                      <button
+                        onClick={e => handleSendEmail(b.booking_id, e)}
+                        disabled={sending}
+                        style={{
+                          fontSize:10, fontWeight:500, padding:'3px 9px', borderRadius:5,
+                          border: errored ? '1px solid rgba(139,32,32,0.3)' : `1px solid rgba(91,138,60,0.3)`,
+                          background: errored ? 'rgba(139,32,32,0.07)' : 'rgba(91,138,60,0.08)',
+                          color: errored ? RED_SOFT : SHINRYOKU,
+                          cursor: sending ? 'default' : 'pointer',
+                          fontFamily:'inherit', display:'flex', alignItems:'center', gap:4,
+                          opacity: sending ? 0.6 : 1, transition:'all 0.15s',
+                        }}>
+                        {sending ? '…' : errored ? '✕ Failed' : '✉ Send Email'}
+                      </button>
+                    )
+                  })()}
+                  <span style={{ fontSize:10, color:WAKABA, letterSpacing:'0.06em' }}>Open offer page ↗</span>
+                </div>
               </Link>
             )
           }
@@ -1381,11 +1435,14 @@ function AnalyticsTab({ orders, bookings }: { orders:Order[]; bookings:Booking[]
 }
 
 // ── Main ──────────────────────────────────────────────────────
+type EmailStatus = { sent: boolean; sentAt: string }
+
 export default function DashboardPage() {
   const [page, setPage] = useState<Page>('dashboard')
   const [orders, setOrders] = useState<Order[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [runtimeIds, setRuntimeIds] = useState<Set<string>>(new Set())
+  const [emailStatuses, setEmailStatuses] = useState<Record<string, EmailStatus>>({})
   const [offerTemplates, setOfferTemplates] = useState<OfferTemplate[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -1400,6 +1457,7 @@ export default function DashboardPage() {
       setOrders(od.orders ?? [])
       setBookings(bd.bookings ?? [])
       setRuntimeIds(new Set(bd.runtimeIds ?? []))
+      setEmailStatuses(bd.emailStatuses ?? {})
       setOfferTemplates(off.offers ?? [])
     } catch {}
     setLoading(false)
@@ -1443,7 +1501,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              {page==='dashboard' && <DashboardTab orders={orders} bookings={bookings} runtimeIds={runtimeIds} offerTemplates={offerTemplates} onBookingDeleted={load} />}
+              {page==='dashboard' && <DashboardTab orders={orders} bookings={bookings} runtimeIds={runtimeIds} emailStatuses={emailStatuses} onEmailSent={(id, status) => setEmailStatuses(s => ({ ...s, [id]: status }))} offerTemplates={offerTemplates} onBookingDeleted={load} />}
               {page==='offers'    && <OffersTab offerTemplates={offerTemplates} />}
               {page==='analytics' && <AnalyticsTab orders={orders} bookings={bookings} />}
             </>

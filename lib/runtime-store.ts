@@ -44,3 +44,21 @@ export async function getPausedOfferIds(): Promise<string[]> {
 export async function setPausedOfferIds(ids: string[]): Promise<void> {
   await redis.set(KEY_PAUSED_OFFERS, ids)
 }
+
+export type EmailStatus = { sent: boolean; sentAt: string }
+
+export async function getEmailStatus(bookingId: string): Promise<EmailStatus | null> {
+  return redis.get<EmailStatus>(`hotel:${HOTEL_ID}:email-status:${bookingId}`)
+}
+
+export async function setEmailStatus(bookingId: string, status: EmailStatus): Promise<void> {
+  await redis.set(`hotel:${HOTEL_ID}:email-status:${bookingId}`, status)
+}
+
+export async function getAllEmailStatuses(bookingIds: string[]): Promise<Record<string, EmailStatus>> {
+  if (bookingIds.length === 0) return {}
+  const results = await Promise.all(bookingIds.map(id => getEmailStatus(id)))
+  const map: Record<string, EmailStatus> = {}
+  bookingIds.forEach((id, i) => { if (results[i]) map[id] = results[i]! })
+  return map
+}

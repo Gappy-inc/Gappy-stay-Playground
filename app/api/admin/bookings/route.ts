@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllBookings } from '@/lib/bookings'
-import { getRuntimeBookings, setRuntimeBookings } from '@/lib/runtime-store'
+import { getRuntimeBookings, setRuntimeBookings, getAllEmailStatuses } from '@/lib/runtime-store'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +10,8 @@ export async function GET() {
     getRuntimeBookings(),
   ])
   const runtimeIds = runtimeBookings.map((b) => b.booking_id)
-  return NextResponse.json({ bookings, runtimeIds })
+  const emailStatuses = await getAllEmailStatuses(bookings.map(b => b.booking_id))
+  return NextResponse.json({ bookings, runtimeIds, emailStatuses })
 }
 
 export async function DELETE(req: NextRequest) {
