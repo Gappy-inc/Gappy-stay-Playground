@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "migrate:0001": "tsx lib/migrations/0001-order-status-backfill.ts",
     "migrate:0001:dry": "tsx lib/migrations/0001-order-status-backfill.ts --dry-run",
     "migrate:0001:rollback": "tsx lib/migrations/0001-order-status-backfill.ts --rollback"
@@ -24,11 +26,16 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.2",
+    "jsdom": "^27.0.1",
     "tailwindcss": "^4",
     "tsx": "^4.22.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
