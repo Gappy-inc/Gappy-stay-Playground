@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { CartItem } from '@/types'
-import { getStrings } from '@/lib/i18n'
 
 function LeafCheck() {
   return (
@@ -20,8 +20,9 @@ function LeafCheck() {
 
 export default function CompletePage() {
   const router = useRouter()
+  const t = useTranslations('complete')
+  const tCart = useTranslations('cart')
   const [confirmedItems, setConfirmedItems] = useState<CartItem[]>([])
-  const [lang, setLang] = useState('en')
 
   useEffect(() => {
     try {
@@ -30,7 +31,6 @@ export default function CompletePage() {
 
       if (bookingRaw) {
         const booking = JSON.parse(bookingRaw)
-        setLang(booking.language ?? 'en')
 
         if (cartRaw) {
           const items: CartItem[] = JSON.parse(cartRaw)
@@ -59,7 +59,6 @@ export default function CompletePage() {
     } catch {}
   }, [])
 
-  const t     = getStrings(lang)
   const total = confirmedItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
   return (
@@ -75,7 +74,7 @@ export default function CompletePage() {
         className="text-3xl font-medium text-center mb-2 fade-in-up"
         style={{ color: '#2C4A1E', letterSpacing: '0.02em', animationDelay: '0.2s' }}
       >
-        {t.bookingConfirmed}
+        {t('heading')}
       </h1>
 
       <div
@@ -87,13 +86,13 @@ export default function CompletePage() {
         className="text-xs text-center mb-2 fade-in-up"
         style={{ color: '#7A8C70', letterSpacing: '0.06em', animationDelay: '0.35s' }}
       >
-        {t.addonsReady}
+        {t('addonsReady')}
       </p>
       <p
         className="text-xs text-center mb-10 fade-in-up"
         style={{ color: '#5B8A3C', letterSpacing: '0.12em', fontStyle: 'italic', animationDelay: '0.4s' }}
       >
-        {t.farewell}
+        {t('farewell')}
       </p>
 
       {confirmedItems.length > 0 && (
@@ -101,7 +100,7 @@ export default function CompletePage() {
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1" style={{ borderTop: '1px dashed #A8C97F' }} />
             <span style={{ color: '#7A8C70', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-              {t.yourAddons}
+              {t('yourAddons')}
             </span>
             <div className="flex-1" style={{ borderTop: '1px dashed #A8C97F' }} />
           </div>
@@ -124,7 +123,7 @@ export default function CompletePage() {
             style={{ borderTop: '1px solid #D4C5A9', marginTop: '0.75rem' }}
           >
             <span className="text-xs font-semibold" style={{ color: '#7A8C70', letterSpacing: '0.08em' }}>
-              {t.total}
+              {tCart('total')}
             </span>
             <span style={{ fontSize: '1.25rem', fontWeight: 600, color: '#2C4A1E' }}>
               ¥{total.toLocaleString()}
@@ -147,7 +146,7 @@ export default function CompletePage() {
           animationDelay: '0.5s',
         }}
       >
-        {t.backToHotel}
+        {t('backToHotel')}
       </button>
     </div>
   )

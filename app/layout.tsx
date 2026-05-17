@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { DM_Sans, Noto_Sans_JP } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
+import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import './globals.css'
 
 const dmSans = DM_Sans({
@@ -18,9 +18,12 @@ const notoSansJP = Noto_Sans_JP({
   display: 'swap',
 })
 
-export const metadata: Metadata = {
-  title: 'Gappy Stay — Personalized Hotel Upsell',
-  description: 'Customize your stay with curated add-ons tailored just for you.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('meta')
+  return {
+    title: t('title'),
+    description: t('description'),
+  }
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

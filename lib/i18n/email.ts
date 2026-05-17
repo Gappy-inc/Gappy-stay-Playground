@@ -1,5 +1,8 @@
 import { createTranslator } from 'next-intl'
 import { DEFAULT_LOCALE, type SupportedLocale } from './config'
+import enMessages from './locales/en.json'
+
+type EnMessages = typeof enMessages
 
 /**
  * Server-side helper for email routes (FR-6).
@@ -9,9 +12,8 @@ import { DEFAULT_LOCALE, type SupportedLocale } from './config'
  * explicitly (typically derived from `booking.language`, with the
  * legacy-`'zh'` alias already normalized by the caller).
  *
- * Returns a translator function with the same surface as `useTranslations`
- * / `getTranslations` so the calling code can be migrated between email
- * and request-bound contexts without changing call sites.
+ * Returns a translator function with the same key-type surface as
+ * `useTranslations` / `getTranslations` so call sites are uniform.
  *
  * @example
  * const t = await getEmailTranslations('ja')
@@ -21,13 +23,13 @@ import { DEFAULT_LOCALE, type SupportedLocale } from './config'
  */
 export async function getEmailTranslations(locale: SupportedLocale) {
   const messages = await loadMessages(locale)
-  return createTranslator({ locale, messages })
+  return createTranslator<EnMessages>({ locale, messages })
 }
 
-async function loadMessages(locale: SupportedLocale): Promise<Record<string, unknown>> {
+async function loadMessages(locale: SupportedLocale): Promise<EnMessages> {
   try {
-    return (await import(`./locales/${locale}.json`)).default
+    return (await import(`./locales/${locale}.json`)).default as EnMessages
   } catch {
-    return (await import(`./locales/${DEFAULT_LOCALE}.json`)).default
+    return (await import(`./locales/${DEFAULT_LOCALE}.json`)).default as EnMessages
   }
 }

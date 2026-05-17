@@ -1,18 +1,11 @@
 import { Booking, MessagingChannel } from '@/types'
-import { getStrings } from '@/lib/i18n'
+import { useFormatter, useTranslations } from 'next-intl'
 
 const CHANNEL_ICON: Record<MessagingChannel, string> = {
   LINE:     '💬',
   WhatsApp: '📱',
   SMS:      '✉️',
   Email:    '📧',
-}
-
-function formatStay(checkIn: string, checkOut: string, locale: string) {
-  const inDate  = new Date(checkIn)
-  const outDate = new Date(checkOut)
-  const fmt = (d: Date) => d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
-  return `${fmt(inDate)} – ${fmt(outDate)}`
 }
 
 /* ── Bamboo SVG ─────────────────────────────────────── */
@@ -79,9 +72,15 @@ const LIGHTS = [
 type Props = { booking: Booking; channel: MessagingChannel }
 
 export default function WelcomeBanner({ booking, channel }: Props) {
-  const t         = getStrings(booking.language)
+  const tOffer = useTranslations('offer')
+  const tChannel = useTranslations('channel')
+  const fmt = useFormatter()
   const firstName = booking.guest_name.split(' ')[0]
-  const nightsLabel = `${booking.nights} ${booking.nights > 1 ? t.nights : t.night}`
+  const inDate = new Date(booking.check_in)
+  const outDate = new Date(booking.check_out)
+  const dateRange =
+    `${fmt.dateTime(inDate, { month: 'short', day: 'numeric' })} – ` +
+    `${fmt.dateTime(outDate, { month: 'short', day: 'numeric' })}`
 
   return (
     <div
@@ -113,24 +112,25 @@ export default function WelcomeBanner({ booking, channel }: Props) {
       ))}
 
       <div style={{ position: 'relative', zIndex: 1 }}>
+        {/* Brand wordmark — untranslated per ADR §3 DD-3 */}
         <p className="text-xs tracking-widest mb-2.5"
           style={{ color: 'rgba(255,255,255,0.55)', letterSpacing: '0.18em' }}>
           GAPPY HOTEL TOKYO
         </p>
 
         <h1 className="text-2xl font-medium text-white mb-1" style={{ letterSpacing: '0.02em' }}>
-          {t.welcome} {firstName}
+          {tOffer('welcome.greeting', { firstName })}
         </h1>
 
         <div className="mb-3" style={{ width: 40, height: 1, background: 'rgba(255,255,255,0.35)' }} />
 
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm mb-4"
           style={{ color: 'rgba(255,255,255,0.78)' }}>
-          <span>{formatStay(booking.check_in, booking.check_out, t.dateLocale)}</span>
+          <span>{dateRange}</span>
           <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
           <span>{booking.room_type}</span>
           <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>
-          <span>{nightsLabel}</span>
+          <span>{tOffer('welcome.nights', { count: booking.nights })}</span>
         </div>
 
         <span
@@ -142,7 +142,7 @@ export default function WelcomeBanner({ booking, channel }: Props) {
             borderRadius: 6,
           }}
         >
-          {CHANNEL_ICON[channel]} {t.channel[channel]}
+          {CHANNEL_ICON[channel]} {tChannel(channel)}
         </span>
       </div>
     </div>
