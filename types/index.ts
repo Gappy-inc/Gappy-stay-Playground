@@ -57,6 +57,8 @@ export type CartItem = {
 
 export type MessagingChannel = 'LINE' | 'WhatsApp' | 'SMS' | 'Email'
 
+import type { RequestStatus } from './request'
+
 export type Order = {
   order_id: string
   booking_id: string
@@ -66,6 +68,9 @@ export type Order = {
   items: CartItem[]
   total: number
   created_at: string
+  status: RequestStatus
+  updated_at: string
+  updated_by: string | null
 }
 
 export type SurveyAnswers = {

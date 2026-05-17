@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "migrate:0001": "tsx lib/migrations/0001-order-status-backfill.ts",
+    "migrate:0001:dry": "tsx lib/migrations/0001-order-status-backfill.ts --dry-run",
+    "migrate:0001:rollback": "tsx lib/migrations/0001-order-status-backfill.ts --rollback"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.88.0",
@@ -25,6 +28,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
+    "tsx": "^4.22.1",
     "typescript": "^5"
   }
 }
