@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 /* ── Leaf illustration ──────────────────────────────── */
@@ -45,6 +46,7 @@ function LeafIllustration() {
 /* ── Page ───────────────────────────────────────────── */
 export default function HomePage() {
   const router = useRouter()
+  const t = useTranslations('landing')
   const [name, setName] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -111,16 +113,16 @@ export default function HomePage() {
         }}
       >
         <h2 className="text-base font-medium mb-1" style={{ color: '#2C4A1E' }}>
-          Welcome to Gappy Hotel Tokyo
+          {t('welcome.heading')}
         </h2>
         <p className="text-xs mb-6 leading-relaxed" style={{ color: '#888' }}>
-          Please enter your full name to access your personalized offers
+          {t('welcome.subtitle')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="text-xs font-medium block mb-2" style={{ color: '#5B8A3C', letterSpacing: '0.05em' }}>
-              Full Name
+              {t('form.nameLabel')}
             </label>
             <input
               type="text"
@@ -128,7 +130,7 @@ export default function HomePage() {
               onChange={(e) => { setName(e.target.value); setError(false) }}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              placeholder="e.g. James Mitchell"
+              placeholder={t('form.namePlaceholder')}
               autoFocus
               autoComplete="off"
               style={{
@@ -148,8 +150,7 @@ export default function HomePage() {
             />
             {error && (
               <p className="text-xs mt-2 leading-relaxed" style={{ color: '#8B2020' }}>
-                We couldn&apos;t find a reservation under that name.
-                Please check your full name and try again.
+                {t('form.notFound')}
               </p>
             )}
           </div>
@@ -173,13 +174,13 @@ export default function HomePage() {
               letterSpacing: '0.03em',
             }}
           >
-            {loading ? 'Searching...' : 'Find My Reservation →'}
+            {loading ? t('form.submitting') : t('form.submit')}
           </button>
         </form>
       </div>
 
       <p className="mt-8 text-xs fade-in-up" style={{ color: '#C0C0B0', animationDelay: '0.15s' }}>
-        Powered by Gappy Stay AI
+        {t('footer.poweredBy')}
       </p>
     </div>
   )

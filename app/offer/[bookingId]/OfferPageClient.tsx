@@ -1,38 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { NextIntlClientProvider, useTranslations } from 'next-intl'
 import { Booking, OfferTemplate, GeneratedOffer } from '@/types'
 import { detectChannel } from '@/lib/channel'
 import { CartProvider } from '@/context/CartContext'
-import { LangProvider } from '@/context/LangContext'
-import { getStrings } from '@/lib/i18n'
+import type { SupportedLocale } from '@/lib/i18n/config'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import OfferCard from '@/components/OfferCard'
 import BundleCard from '@/components/BundleCard'
 import CartDrawer from '@/components/CartDrawer'
 
-// ── Category config ──────────────────────────────────────────────────────────
-const CATEGORY_LABELS: Record<string, Record<string, string>> = {
-  room:       { en: 'Room & Stay',    ja: 'お部屋・滞在',     ko: '객실·숙박',   zh: '客房·住宿' },
-  dining:     { en: 'Dining',         ja: 'お食事',           ko: '다이닝',      zh: '餐饮' },
-  wellness:   { en: 'Wellness & Spa', ja: 'ウェルネス・スパ', ko: '웰니스·스파', zh: 'wellness·水疗' },
-  transport:  { en: 'Transport',      ja: '送迎・交通',       ko: '교통',        zh: '交通' },
-  experience: { en: 'Experiences',    ja: '体験',             ko: '체험',        zh: '体验' },
-  bundle:     { en: 'Bundle & Save',  ja: 'セットでお得に',   ko: '번들 할인',   zh: '套餐优惠' },
-}
-
-const SECTION_INTRO: Record<string, string> = {
-  en: 'Curated especially for your stay',
-  ja: 'ご滞在をより特別なものにするためのご提案です',
-  ko: '고객님의 숙박을 위해 특별히 준비했습니다',
-  zh: '为您的住宿精心准备',
-}
-
-const CATEGORY_ORDER = ['room', 'dining', 'wellness', 'transport', 'experience']
-
-function label(cat: string, lang: string) {
-  return CATEGORY_LABELS[cat]?.[lang] ?? CATEGORY_LABELS[cat]?.['en'] ?? cat
-}
+const CATEGORY_ORDER = ['room', 'dining', 'wellness', 'transport', 'experience'] as const
+type CategoryKey = (typeof CATEGORY_ORDER)[number] | 'bundle'
 
 // ── Leaf SVG for dividers ────────────────────────────────────────────────────
 function LeafIcon() {
@@ -69,7 +49,6 @@ function Divider({ title }: { title: string }) {
   )
 }
 
-
 // ── Snap-scroll section ──────────────────────────────────────────────────────
 function CategorySection({
   title,
@@ -98,7 +77,6 @@ function CategorySection({
         <Divider title={title} />
       </div>
 
-      {/* Snap scroll — breaks out of px-4 */}
       <div className="overflow-hidden" style={{ marginLeft: '-0px', marginRight: '-0px' }}>
         <div
           ref={scrollRef}
@@ -124,7 +102,6 @@ function CategorySection({
         </div>
       </div>
 
-      {/* Dot indicators */}
       {offers.length > 1 && (
         <div className="flex justify-center gap-1.5 mt-3 pb-1">
           {offers.map((_, i) => (
@@ -144,14 +121,14 @@ function CategorySection({
   )
 }
 
-// ── Main component ───────────────────────────────────────────────────────────
-type Props = { booking: Booking; offerTemplates: OfferTemplate[] }
+// ── Inner content — runs under the page's NextIntlClientProvider ────────────
+function OfferPageInner({ booking, offerTemplates }: { booking: Booking; offerTemplates: OfferTemplate[] }) {
+  const t = useTranslations('offer')
+  const tCategory = useTranslations('offer.category')
 
-export default function OfferPageClient({ booking, offerTemplates }: Props) {
   const [offers, setOffers] = useState<GeneratedOffer[]>([])
   const [loading, setLoading] = useState(true)
   const channel = detectChannel(booking.phone)
-  const lang    = booking.language
 
   useEffect(() => {
     localStorage.setItem('gappy-current-booking', JSON.stringify(booking))
@@ -179,114 +156,117 @@ export default function OfferPageClient({ booking, offerTemplates }: Props) {
     fetchOffers()
   }, [booking, offerTemplates])
 
-  // Group by category
   const byCategory = CATEGORY_ORDER.reduce<Record<string, GeneratedOffer[]>>((acc, cat) => {
     acc[cat] = offers.filter((o) => o.category === cat)
     return acc
   }, {})
 
   const bundleOffers = offers.filter((o) => o.category === 'bundle')
-
   const hasAny = CATEGORY_ORDER.some((c) => (byCategory[c]?.length ?? 0) > 0)
-
-  // Alternating backgrounds
   const sectionBgs = ['#F8F6F0', '#F0F4EC']
   let bgIndex = 0
 
-  const introText = SECTION_INTRO[lang] ?? SECTION_INTRO['en']
-  const t = getStrings(lang)
-
   return (
-    <LangProvider lang={lang}>
-    <CartProvider>
-      <div className="min-h-screen" style={{ background: '#F8F6F0' }}>
-
-        {/* Top nav */}
-        <div className="bg-white px-5 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid #F0EBE0' }}>
-          <a href="/" className="text-xs transition-colors" style={{ color: '#A8C97F', letterSpacing: '0.05em' }}>
-            {t.back}
-          </a>
-          <span style={{ color: '#D4C5A9' }}>|</span>
-          <span className="text-xs font-medium" style={{ color: '#5B8A3C', letterSpacing: '0.08em' }}>▶ Gappy Stay</span>
-        </div>
-
-        <WelcomeBanner booking={booking} channel={channel} />
-
-        <div className="px-4 py-6 pb-32 max-w-lg mx-auto space-y-4">
-
-          {/* Loading skeleton */}
-          {loading && (
-            <>
-              <section>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 h-px skeleton" />
-                  <div className="w-24 h-3 skeleton" />
-                  <div className="flex-1 h-px skeleton" />
-                </div>
-                <div className="h-64 skeleton" />
-              </section>
-              <section>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 h-px skeleton" />
-                  <div className="w-20 h-3 skeleton" />
-                  <div className="flex-1 h-px skeleton" />
-                </div>
-                <div className="h-40 skeleton" />
-              </section>
-            </>
-          )}
-
-          {/* Section intro — shown once above first category */}
-          {!loading && hasAny && (
-            <p
-              className="text-center text-xs fade-in-up"
-              style={{ color: '#7A8C70', letterSpacing: '0.06em', paddingTop: '0.5rem' }}
-            >
-              {introText}
-            </p>
-          )}
-
-          {/* Category sections */}
-          {!loading && hasAny && CATEGORY_ORDER.map((cat) => {
-            const catOffers = byCategory[cat] ?? []
-            if (catOffers.length === 0) return null
-            const bg = sectionBgs[bgIndex++ % 2]
-            return (
-              <CategorySection
-                key={cat}
-                title={label(cat, lang)}
-                offers={catOffers}
-                bg={bg}
-              />
-            )
-          })}
-
-          {/* Bundle section */}
-          {!loading && bundleOffers.length > 0 && (
-            <section style={{ background: '#F0F4EC', borderRadius: 12, padding: '1rem' }}>
-              <Divider title={label('bundle', lang)} />
-              <div className="space-y-3">
-                {bundleOffers.map((offer) => (
-                  <BundleCard key={offer.offer_id} offer={offer} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Empty state */}
-          {!loading && !hasAny && bundleOffers.length === 0 && (
-            <div
-              className="text-center py-16 text-sm"
-              style={{ color: '#bbb', letterSpacing: '0.05em' }}
-            >
-              {t.noOffers}
-            </div>
-          )}
-        </div>
-
-        <CartDrawer />
+    <div className="min-h-screen" style={{ background: '#F8F6F0' }}>
+      <div className="bg-white px-5 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid #F0EBE0' }}>
+        <a href="/" className="text-xs transition-colors" style={{ color: '#A8C97F', letterSpacing: '0.05em' }}>
+          {t('back')}
+        </a>
+        <span style={{ color: '#D4C5A9' }}>|</span>
+        {/* Brand wordmark — untranslated per ADR §3 DD-3 */}
+        <span className="text-xs font-medium" style={{ color: '#5B8A3C', letterSpacing: '0.08em' }}>▶ Gappy Stay</span>
       </div>
-    </CartProvider>
-    </LangProvider>
+
+      <WelcomeBanner booking={booking} channel={channel} />
+
+      <div className="px-4 py-6 pb-32 max-w-lg mx-auto space-y-4">
+
+        {loading && (
+          <>
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px skeleton" />
+                <div className="w-24 h-3 skeleton" />
+                <div className="flex-1 h-px skeleton" />
+              </div>
+              <div className="h-64 skeleton" />
+            </section>
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px skeleton" />
+                <div className="w-20 h-3 skeleton" />
+                <div className="flex-1 h-px skeleton" />
+              </div>
+              <div className="h-40 skeleton" />
+            </section>
+          </>
+        )}
+
+        {!loading && hasAny && (
+          <p
+            className="text-center text-xs fade-in-up"
+            style={{ color: '#7A8C70', letterSpacing: '0.06em', paddingTop: '0.5rem' }}
+          >
+            {t('section.intro')}
+          </p>
+        )}
+
+        {!loading && hasAny && CATEGORY_ORDER.map((cat) => {
+          const catOffers = byCategory[cat] ?? []
+          if (catOffers.length === 0) return null
+          const bg = sectionBgs[bgIndex++ % 2]
+          return (
+            <CategorySection
+              key={cat}
+              title={tCategory(cat satisfies CategoryKey)}
+              offers={catOffers}
+              bg={bg}
+            />
+          )
+        })}
+
+        {!loading && bundleOffers.length > 0 && (
+          <section style={{ background: '#F0F4EC', borderRadius: 12, padding: '1rem' }}>
+            <Divider title={tCategory('bundle')} />
+            <div className="space-y-3">
+              {bundleOffers.map((offer) => (
+                <BundleCard key={offer.offer_id} offer={offer} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {!loading && !hasAny && bundleOffers.length === 0 && (
+          <div
+            className="text-center py-16 text-sm"
+            style={{ color: '#bbb', letterSpacing: '0.05em' }}
+          >
+            {t('section.empty')}
+          </div>
+        )}
+      </div>
+
+      <CartDrawer />
+    </div>
+  )
+}
+
+// ── Outer wrapper — receives the page-resolved locale and re-rewraps the
+//    NextIntlClientProvider so the booking.language final-fallback applies
+//    to the entire client subtree (per ADR §3 DD-6).
+type Props = {
+  booking: Booking
+  offerTemplates: OfferTemplate[]
+  locale: SupportedLocale
+  messages: Record<string, unknown>
+}
+
+export default function OfferPageClient({ booking, offerTemplates, locale, messages }: Props) {
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <CartProvider>
+        <OfferPageInner booking={booking} offerTemplates={offerTemplates} />
+      </CartProvider>
+    </NextIntlClientProvider>
   )
 }

@@ -1,15 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { GeneratedOffer } from '@/types'
 import { useCart } from '@/context/CartContext'
-import { useLang } from '@/context/LangContext'
+import { unitLabel } from '@/lib/i18n/format'
 
 type Props = { offer: GeneratedOffer }
 
 export default function BundleCard({ offer }: Props) {
   const { addItem, hasItem } = useCart()
-  const t = useLang()
+  const t = useTranslations('bundleCard')
+  const tOffer = useTranslations('offerCard')
+  const tUnits = useTranslations('units')
   const [bouncing, setBouncing] = useState(false)
   const added   = hasItem(offer.offer_id)
   const savings = offer.original_price ? offer.original_price - offer.price : null
@@ -37,11 +40,11 @@ export default function BundleCard({ offer }: Props) {
         style={{ background: '#B8963E' }}
       >
         <span className="text-white text-xs font-semibold" style={{ letterSpacing: '0.12em' }}>
-          {t.bundleLabel}
+          {t('label')}
         </span>
         {savings && (
           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
-            ¥{savings.toLocaleString()} OFF
+            {t('savingsOff', { amount: savings.toLocaleString() })}
           </span>
         )}
       </div>
@@ -95,7 +98,7 @@ export default function BundleCard({ offer }: Props) {
                 ¥{offer.price.toLocaleString()}
               </span>
               <span className="text-xs" style={{ color: '#888' }}>
-                {t.units[offer.unit] ?? offer.unit}
+                {unitLabel(tUnits, offer.unit)}
               </span>
             </div>
           </div>
@@ -111,7 +114,7 @@ export default function BundleCard({ offer }: Props) {
               cursor: added ? 'default' : 'pointer',
             }}
           >
-            {added ? t.addedBtn : t.addBundleBtn}
+            {added ? tOffer('added') : t('addBundle')}
           </button>
         </div>
       </div>

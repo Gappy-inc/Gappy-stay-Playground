@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { CartItem } from '@/types'
-import { getStrings } from '@/lib/i18n'
+import { unitLabel } from '@/lib/i18n/format'
 
 export default function CheckoutPage() {
   const router = useRouter()
+  const t = useTranslations('cart')
+  const tUnits = useTranslations('units')
   const [items, setItems]   = useState<CartItem[]>([])
   const [loaded, setLoaded] = useState(false)
-  const [lang, setLang]     = useState('en')
 
   useEffect(() => {
     try {
-      const saved      = localStorage.getItem('gappy-cart')
-      const bookingRaw = localStorage.getItem('gappy-current-booking')
+      const saved = localStorage.getItem('gappy-cart')
       if (saved) setItems(JSON.parse(saved))
-      if (bookingRaw) setLang(JSON.parse(bookingRaw).language ?? 'en')
     } catch {}
     setLoaded(true)
   }, [])
@@ -27,7 +27,6 @@ export default function CheckoutPage() {
     localStorage.setItem('gappy-cart', JSON.stringify(updated))
   }
 
-  const t     = getStrings(lang)
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
   if (!loaded) return null
@@ -39,7 +38,7 @@ export default function CheckoutPage() {
         style={{ background: 'linear-gradient(170deg, #F8F6F0 0%, #F0F4EC 100%)' }}
       >
         <p className="text-3xl">🛒</p>
-        <p className="text-sm" style={{ color: '#999' }}>{t.cartEmpty}</p>
+        <p className="text-sm" style={{ color: '#999' }}>{t('empty')}</p>
         <button
           onClick={() => router.push('/')}
           className="text-sm px-6 py-3"
@@ -53,7 +52,7 @@ export default function CheckoutPage() {
             cursor: 'pointer',
           }}
         >
-          {t.back}
+          <BackLabel />
         </button>
       </div>
     )
@@ -69,13 +68,13 @@ export default function CheckoutPage() {
           className="text-xs mb-5 block transition-colors"
           style={{ color: '#A8C97F', letterSpacing: '0.05em' }}
         >
-          {t.back}
+          <BackLabel />
         </button>
         <h1 className="text-2xl font-medium" style={{ color: '#2C4A1E', letterSpacing: '0.02em' }}>
-          {t.yourAddons}
+          {t('title')}
         </h1>
         <p className="text-xs mt-1" style={{ color: '#7A8C70', letterSpacing: '0.05em' }}>
-          {t.reviewBefore}
+          {t('reviewBefore')}
         </p>
       </div>
 
@@ -92,7 +91,7 @@ export default function CheckoutPage() {
                 {item.title}
               </p>
               <p className="text-xs mt-0.5" style={{ color: '#B0B0A0' }}>
-                {t.units[item.unit] ?? item.unit}
+                {unitLabel(tUnits, item.unit)}
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -119,13 +118,13 @@ export default function CheckoutPage() {
           className="flex items-center justify-between py-4 mb-1"
           style={{ borderTop: '2px solid #2C4A1E' }}
         >
-          <span className="text-sm font-semibold" style={{ color: '#2C4A1E' }}>{t.total}</span>
+          <span className="text-sm font-semibold" style={{ color: '#2C4A1E' }}>{t('total')}</span>
           <span className="font-semibold" style={{ fontSize: '1.75rem', color: '#5B8A3C' }}>
             ¥{total.toLocaleString()}
           </span>
         </div>
         <p className="text-xs mb-6" style={{ color: '#B0B0A0' }}>
-          {t.roomBillNote}
+          {t('roomBillNote')}
         </p>
 
         <button
@@ -141,9 +140,15 @@ export default function CheckoutPage() {
             cursor: 'pointer',
           }}
         >
-          {t.confirmPay}
+          {t('confirmPay')}
         </button>
       </div>
     </div>
   )
+}
+
+/** Tiny inline component for the common.back string — avoids a second hook call. */
+function BackLabel() {
+  const t = useTranslations('common')
+  return <>{t('back')}</>
 }

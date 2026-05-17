@@ -6,5 +6,96 @@
   "languageSwitcher": {
     "label": "Language",
     "ariaChanged": "Language changed to {language}"
+  },
+  "meta": {
+    "title": "Gappy Stay — Personalized Hotel Upsell",
+    "description": "Customize your stay with curated add-ons tailored just for you."
+  },
+  "landing": {
+    "welcome": {
+      "heading": "Welcome to Gappy Hotel Tokyo",
+      "subtitle": "Please enter your full name to access your personalized offers"
+    },
+    "form": {
+      "nameLabel": "Full Name",
+      "namePlaceholder": "e.g. James Mitchell",
+      "notFound": "We couldn't find a reservation under that name. Please check your full name and try again.",
+      "submitting": "Searching…",
+      "submit": "Find My Reservation →"
+    },
+    "footer": {
+      "poweredBy": "Powered by Gappy Stay AI"
+    }
+  },
+  "offer": {
+    "back": "← Back",
+    "welcome": {
+      "greeting": "Welcome, {firstName}",
+      "nights": "{count, plural, one {# night} other {# nights}}"
+    },
+    "section": {
+      "intro": "Curated especially for your stay",
+      "empty": "─ No offers available at this time ─"
+    },
+    "category": {
+      "room": "Room & Stay",
+      "dining": "Dining",
+      "wellness": "Wellness & Spa",
+      "transport": "Transport",
+      "experience": "Experiences",
+      "bundle": "Bundle & Save"
+    }
+  },
+  "offerCard": {
+    "add": "Add +",
+    "added": "✓ Added",
+    "onlyLeft": "{count, plural, one {Only # left} other {Only # left}}"
+  },
+  "bundleCard": {
+    "label": "BEST VALUE SET",
+    "savingsOff": "¥{amount} OFF",
+    "addBundle": "Add Bundle +"
+  },
+  "cart": {
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "checkout": "Checkout →",
+    "empty": "Your cart is empty",
+    "title": "Your Add-ons",
+    "reviewBefore": "Review before confirming",
+    "total": "Total",
+    "roomBillNote": "Charges will be added to your room bill at check-out.",
+    "confirmPay": "Confirm & Pay"
+  },
+  "complete": {
+    "heading": "Booking Confirmed",
+    "addonsReady": "Your add-ons have been reserved and will be ready on arrival.",
+    "farewell": "We look forward to welcoming you.",
+    "yourAddons": "Your Add-ons",
+    "backToHotel": "← Back to Hotel"
+  },
+  "channel": {
+    "LINE": "Sent via LINE",
+    "WhatsApp": "Sent via WhatsApp",
+    "SMS": "Sent via SMS",
+    "Email": "Sent via Email"
+  },
+  "units": {
+    "perStay": "per stay",
+    "perNight": "per night",
+    "perPerson": "per person",
+    "perPersonPerDay": "per person / day",
+    "perTrip": "per trip"
+  },
+  "email": {
+    "pageTitle": "Your Special Offers | Gappy Stay",
+    "greeting": "Dear {firstName},",
+    "intro": "Your upcoming stay is almost here! We've prepared exclusive offers to make your visit even more special.",
+    "cta": "View All Offers →",
+    "offerLabel": "Featured Offers",
+    "subject": "{firstName}, your exclusive offers await 🏨",
+    "footer": {
+      "line1": "Gappy Stay · Hotel Upsell Platform",
+      "line2": "This offer link is personal to your booking and expires at check-out."
+    }
   }
 }

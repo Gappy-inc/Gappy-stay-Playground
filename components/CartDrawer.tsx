@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCart } from '@/context/CartContext'
-import { useLang } from '@/context/LangContext'
 
 export default function CartDrawer() {
-  const { items, total, itemCount } = useCart()
+  const { total, itemCount } = useCart()
   const router = useRouter()
-  const t = useLang()
+  const t = useTranslations('cart')
   const [bouncing, setBouncing] = useState(false)
   const [prevCount, setPrevCount] = useState(itemCount)
 
@@ -39,11 +39,11 @@ export default function CartDrawer() {
         <div className="flex items-center gap-2.5">
           <span className="text-base">🛒</span>
           <span>
-            {t.cartItems(itemCount)} · ¥{total.toLocaleString()}
+            {t('itemCount', { count: itemCount })} · ¥{total.toLocaleString()}
           </span>
         </div>
         <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '12px', letterSpacing: '0.08em' }}>
-          {t.checkoutBtn}
+          {t('checkout')}
         </span>
       </button>
     </div>
