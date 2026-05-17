@@ -96,6 +96,17 @@
     "footer": {
       "line1": "Gappy Stay · Hotel Upsell Platform",
       "line2": "This offer link is personal to your booking and expires at check-out."
+    },
+    "preArrival": {
+      "subject": "Your reservation at {hotelName} – {checkInDate}",
+      "greeting": "Dear {firstName},",
+      "intro": "We're delighted to welcome you to {hotelName} on {checkInDate}. Here's some key information about your stay and an exclusive offer for you to consider:",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "address": "Address",
+      "body": "To make your stay even more enjoyable, we've prepared a limited-time personalised upgrade and services to enhance your experience. To discover the available options, please click the button below.",
+      "cta": "Personalise your stay! →",
+      "footer": "You received this email because you have a reservation. To unsubscribe, contact your hotel directly."
     }
   }
 }

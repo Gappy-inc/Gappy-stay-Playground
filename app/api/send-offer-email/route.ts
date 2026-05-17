@@ -4,27 +4,11 @@ import { getBookingById } from '@/lib/bookings'
 import { getEmailStatus, setEmailStatus } from '@/lib/runtime-store'
 import offersData from '@/data/offers.json'
 import type { OfferTemplate } from '@/types'
-import {
-  DEFAULT_LOCALE,
-  isSupportedLocale,
-  type SupportedLocale,
-} from '@/lib/i18n/config'
+import type { SupportedLocale } from '@/lib/i18n/config'
 import { getEmailTranslations } from '@/lib/i18n/email'
+import { normalizeBookingLocale } from '@/lib/i18n/resolve'
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://gappy-stay.vercel.app'
-
-/**
- * Normalize a `Booking.language` value to a {@link SupportedLocale}.
- *
- * Legacy data stores `'zh'` (Simplified by convention); the alias is
- * applied here so the rest of the email pipeline only sees real
- * SupportedLocale values.
- */
-function normalizeBookingLocale(raw: string | undefined): SupportedLocale {
-  if (raw === 'zh') return 'zh-CN'
-  if (raw && isSupportedLocale(raw)) return raw
-  return DEFAULT_LOCALE
-}
 
 async function buildEmail(
   guestName: string,

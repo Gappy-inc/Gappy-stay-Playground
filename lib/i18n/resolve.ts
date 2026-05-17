@@ -194,6 +194,19 @@ function matchBookingLanguage(value: string | null | undefined): SupportedLocale
 }
 
 /**
+ * Normalize a stored `Booking.language` value to a SupportedLocale,
+ * falling back to {@link DEFAULT_LOCALE} when the value is missing or
+ * unsupported.
+ *
+ * Use this in email routes and other server-side code that needs a
+ * concrete locale (not the resolution chain) — i.e. when the booking is
+ * the *only* signal available because there's no request context.
+ */
+export function normalizeBookingLocale(value: string | null | undefined): SupportedLocale {
+  return matchBookingLanguage(value) ?? DEFAULT_LOCALE
+}
+
+/**
  * Re-exported convenience: the typed list of supported locales.
  * Same as importing `SUPPORTED_LOCALES` directly; provided here so
  * call sites that already import `resolveLocale` don't need a second

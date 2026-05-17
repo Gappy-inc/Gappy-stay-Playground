@@ -47,17 +47,33 @@ export async function setPausedOfferIds(ids: string[]): Promise<void> {
 
 export type EmailStatus = { sent: boolean; sentAt: string }
 
-export async function getEmailStatus(bookingId: string): Promise<EmailStatus | null> {
-  return redis.get<EmailStatus>(`hotel:${HOTEL_ID}:email-status:${bookingId}`)
+/**
+ * Email kinds tracked independently for idempotency. A booking can have
+ * both an `offer` email and a `prearrival` email — they must not share a
+ * Redis key, otherwise sending one would mark the other as already-sent.
+ */
+export type EmailKind = 'offer' | 'prearrival'
+
+function emailStatusKey(bookingId: string, kind: EmailKind): string {
+  // Legacy 'offer' entries are stored at the unsuffixed key; preserve
+  // that prefix so Redis state written before pre-arrival shipped still
+  // resolves correctly.
+  return kind === 'offer'
+    ? `hotel:${HOTEL_ID}:email-status:${bookingId}`
+    : `hotel:${HOTEL_ID}:email-status:${kind}:${bookingId}`
 }
 
-export async function setEmailStatus(bookingId: string, status: EmailStatus): Promise<void> {
-  await redis.set(`hotel:${HOTEL_ID}:email-status:${bookingId}`, status)
+export async function getEmailStatus(bookingId: string, kind: EmailKind = 'offer'): Promise<EmailStatus | null> {
+  return redis.get<EmailStatus>(emailStatusKey(bookingId, kind))
 }
 
-export async function getAllEmailStatuses(bookingIds: string[]): Promise<Record<string, EmailStatus>> {
+export async function setEmailStatus(bookingId: string, status: EmailStatus, kind: EmailKind = 'offer'): Promise<void> {
+  await redis.set(emailStatusKey(bookingId, kind), status)
+}
+
+export async function getAllEmailStatuses(bookingIds: string[], kind: EmailKind = 'offer'): Promise<Record<string, EmailStatus>> {
   if (bookingIds.length === 0) return {}
-  const results = await Promise.all(bookingIds.map(id => getEmailStatus(id)))
+  const results = await Promise.all(bookingIds.map(id => getEmailStatus(id, kind)))
   const map: Record<string, EmailStatus> = {}
   bookingIds.forEach((id, i) => { if (results[i]) map[id] = results[i]! })
   return map
