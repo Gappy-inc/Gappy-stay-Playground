@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRuntimeOrders, addRuntimeOrder, setRuntimeOrders } from '@/lib/runtime-store'
-import { Order } from '@/types'
+import { backfillOrder } from '@/lib/order-backfill'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,8 +9,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const order: Order = await req.json()
-  await addRuntimeOrder(order)
+  const raw = await req.json()
+  await addRuntimeOrder(backfillOrder(raw))
   return NextResponse.json({ ok: true })
 }
 
