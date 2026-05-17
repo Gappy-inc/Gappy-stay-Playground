@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { DM_Sans, Noto_Sans_JP } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 
 const dmSans = DM_Sans({
@@ -21,10 +23,21 @@ export const metadata: Metadata = {
   description: 'Customize your stay with curated add-ons tailored just for you.',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Both come from lib/i18n/request.ts (next-intl/server). The active
+  // locale is resolved by the proxy + request config chain; the messages
+  // chunk shipped to the client is only the active locale's payload
+  // (NFR-1: no cross-locale bundle bloat).
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="en" className={`${dmSans.variable} ${notoSansJP.variable}`}>
-      <body className="min-h-screen">{children}</body>
+    <html lang={locale} className={`${dmSans.variable} ${notoSansJP.variable}`}>
+      <body className="min-h-screen">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   )
 }

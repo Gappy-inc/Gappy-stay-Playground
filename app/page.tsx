@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 /* ── Leaf illustration ──────────────────────────────── */
 function LeafIllustration() {
@@ -77,6 +78,12 @@ export default function HomePage() {
       className="min-h-screen flex flex-col items-center justify-center px-6"
       style={{ background: 'linear-gradient(170deg, #F8F6F0 0%, #F0F4EC 100%)' }}
     >
+      {/* Language switcher — FR-2: top-right of the landing page. T-1 will
+          adjust visual treatment. */}
+      <div style={{ position: 'absolute', top: 16, right: 16, color: '#5B8A3C' }}>
+        <LanguageSwitcher />
+      </div>
+
       {/* Logo */}
       <div className="mb-2 text-center fade-in-up">
         <p className="text-xs tracking-widest mb-3" style={{ color: '#A8C97F', letterSpacing: '0.25em' }}>
