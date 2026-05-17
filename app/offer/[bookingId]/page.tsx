@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
 import { getBookingById } from '@/lib/bookings'
 import { getAllOffers } from '@/lib/offers'
+import enMessages from '@/lib/i18n/locales/en.json'
 import {
   LOCALE_COOKIE,
   PROXY_URL_LANG_HEADER,
@@ -9,6 +10,7 @@ import {
   type SupportedLocale,
 } from '@/lib/i18n/config'
 import { resolveLocale } from '@/lib/i18n/resolve'
+import { deepMerge, type AnyMessages } from '@/lib/i18n/merge'
 import OfferPageClient from './OfferPageClient'
 
 type Props = {
@@ -62,10 +64,16 @@ export default async function OfferPage({ params }: Props) {
   )
 }
 
-async function loadMessages(locale: SupportedLocale): Promise<Record<string, unknown>> {
-  try {
-    return (await import(`@/lib/i18n/locales/${locale}.json`)).default
-  } catch {
-    return (await import(`@/lib/i18n/locales/${DEFAULT_LOCALE}.json`)).default
-  }
+async function loadMessages(locale: SupportedLocale): Promise<AnyMessages> {
+  const target: AnyMessages = await (async () => {
+    try {
+      return (await import(`@/lib/i18n/locales/${locale}.json`)).default as AnyMessages
+    } catch {
+      return (await import(`@/lib/i18n/locales/${DEFAULT_LOCALE}.json`)).default as AnyMessages
+    }
+  })()
+  // FR-7: deep-merge en under the target so missing keys silently resolve
+  // to the English source rather than rendering raw key paths.
+  if (locale === DEFAULT_LOCALE) return target
+  return deepMerge(enMessages as AnyMessages, target)
 }
