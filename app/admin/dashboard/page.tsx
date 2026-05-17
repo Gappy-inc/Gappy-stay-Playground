@@ -9,6 +9,7 @@ import {
 } from 'chart.js'
 import { Line, Doughnut, Bar } from 'react-chartjs-2'
 import type { Booking, CartItem } from '@/types'
+import { RequestsTable } from '@/components/admin/RequestsTable'
 
 ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement,
@@ -28,7 +29,7 @@ type OfferTemplate = {
   unit: string; availability: number; popularity: number
   tags: string[]; applicable_to: string[]; includes?: string[]
 }
-type Page = 'dashboard' | 'offers' | 'analytics'
+type Page = 'dashboard' | 'requests' | 'offers' | 'analytics'
 
 // ── Design tokens — match guest app exactly ──────────────────
 const SHINRYOKU  = '#5B8A3C'   // main green
@@ -270,6 +271,10 @@ function Sidebar({ active, onNav, offerCount }: { active:Page; onNav:(p:Page)=>v
       <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
         <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+      </svg> },
+    { id:'requests', label:'Requests', icon:
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg> },
     { id:'offers', label:'Offers', badge:offerCount, icon:
       <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -1121,6 +1126,16 @@ function DashboardTab({ orders, bookings, runtimeIds, emailStatuses, onEmailSent
   )
 }
 
+// ── Requests tab ──────────────────────────────────────────────
+function RequestsTab() {
+  return (
+    <SectionCard>
+      <LeafDivider title="Approval Requests" />
+      <RequestsTable />
+    </SectionCard>
+  )
+}
+
 // ── Offers tab ────────────────────────────────────────────────
 function OffersTab({ offerTemplates }: { offerTemplates:OfferTemplate[] }) {
   const [query, setQuery] = useState('')
@@ -1465,7 +1480,7 @@ export default function DashboardPage() {
 
   useEffect(() => { load() }, [load])
 
-  const titles: Record<Page,string> = { dashboard:'Dashboard', offers:'Offers', analytics:'Analytics' }
+  const titles: Record<Page,string> = { dashboard:'Dashboard', requests:'Requests', offers:'Offers', analytics:'Analytics' }
 
   return (
     <div style={{ background:BG, minHeight:'100vh', color:SUMI, fontFamily:"'DM Sans','Noto Sans JP',sans-serif" }}>
@@ -1502,6 +1517,7 @@ export default function DashboardPage() {
           ) : (
             <>
               {page==='dashboard' && <DashboardTab orders={orders} bookings={bookings} runtimeIds={runtimeIds} emailStatuses={emailStatuses} onEmailSent={(id, status) => setEmailStatuses(s => ({ ...s, [id]: status }))} offerTemplates={offerTemplates} onBookingDeleted={load} />}
+              {page==='requests'  && <RequestsTab />}
               {page==='offers'    && <OffersTab offerTemplates={offerTemplates} />}
               {page==='analytics' && <AnalyticsTab orders={orders} bookings={bookings} />}
             </>
