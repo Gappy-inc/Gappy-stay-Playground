@@ -1,0 +1,10 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "back": "← Back"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "ariaChanged": "Language changed to {language}"
+  }
+}

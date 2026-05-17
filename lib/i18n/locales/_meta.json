@@ -1,0 +1,10 @@
+{
+  "schema": "1",
+  "doc": "Per-locale, per-key review status. 'ai' = AI-bootstrapped (needs review). 'human' = native-speaker reviewed. The en file is the source — entries here mirror its key set. See docs/adr/0001-i18n-architecture.md §3 DD-4.",
+  "locales": {
+    "ja": {},
+    "zh-TW": {},
+    "zh-CN": {},
+    "ko": {}
+  }
+}
