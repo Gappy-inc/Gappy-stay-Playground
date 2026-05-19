@@ -15,6 +15,10 @@ export type Booking = {
   total_paid: number
   special_requests: string
   tags: string[]
+  // ISO timestamp of booking confirmation. Optional because legacy
+  // fixtures pre-date the scheduler; the scheduler falls back to a
+  // derivation from `check_in` when absent.
+  confirmed_at?: string
 }
 
 export type OfferTemplate = {
